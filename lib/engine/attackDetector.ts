@@ -96,6 +96,24 @@ export function detectSecurityAttacks(
           long_term_fix:
             "Deploy an Intrusion Detection System (Snort/Suricata) with rate-limiting drop rules and ensure unused listening service ports are disabled.",
         },
+        mitre_technique: {
+          id: "T1046",
+          name: "Network Service Discovery",
+          tactic: "Discovery",
+          url: "https://attack.mitre.org/techniques/T1046",
+        },
+        cwe: {
+          id: "CWE-200",
+          name: "Exposure of Sensitive Information to an Unauthorized Actor",
+          url: "https://cwe.mitre.org/data/definitions/200.html",
+        },
+        remediation_rules: {
+          iptables: `iptables -A INPUT -s ${src} -j DROP\niptables -A INPUT -p tcp -m state --state NEW -m limit --limit 10/s --limit-burst 20 -j ACCEPT`,
+          snort: `alert tcp ${src} any -> any any (flags:S; threshold:type threshold, track by_src, count 20, seconds 2; msg:"PACKETFLOW: Port Scan from ${src}"; sid:1000001; rev:1;)`,
+          cisco: `access-list 100 remark Block Port Scanner ${src}\naccess-list 100 deny ip host ${src} any\naccess-list 100 permit ip any any`,
+        },
+        affected_ips: [src, dst],
+        affected_ports: portArray.slice(0, 10),
       });
     }
   }
@@ -119,6 +137,23 @@ export function detectSecurityAttacks(
           immediate_action: `Isolate host ${src} from the network segment.`,
           long_term_fix: "Configure stateful packet inspection (SPI) firewalls to drop non-standard TCP flag combinations.",
         },
+        mitre_technique: {
+          id: "T1046",
+          name: "Network Service Discovery",
+          tactic: "Discovery",
+          url: "https://attack.mitre.org/techniques/T1046",
+        },
+        cwe: {
+          id: "CWE-200",
+          name: "Exposure of Sensitive Information",
+          url: "https://cwe.mitre.org/data/definitions/200.html",
+        },
+        remediation_rules: {
+          iptables: `iptables -A INPUT -p tcp --tcp-flags ALL FIN,PSH,URG -j DROP`,
+          snort: `alert tcp ${src} any -> any any (flags:FPU; msg:"PACKETFLOW: Evasive XMAS Scan"; sid:1000002; rev:1;)`,
+        },
+        affected_ips: [src],
+        affected_ports: Array.from(data.ports).slice(0, 5),
       });
     }
   }
@@ -141,6 +176,18 @@ export function detectSecurityAttacks(
           immediate_action: `Add a drop rule for source IP ${src}.`,
           long_term_fix: "Ensure host firewall blocks stateless packets with no TCP control flags.",
         },
+        mitre_technique: {
+          id: "T1046",
+          name: "Network Service Discovery",
+          tactic: "Discovery",
+          url: "https://attack.mitre.org/techniques/T1046",
+        },
+        remediation_rules: {
+          iptables: `iptables -A INPUT -p tcp --tcp-flags ALL NONE -j DROP`,
+          snort: `alert tcp ${src} any -> any any (flags:0; msg:"PACKETFLOW: TCP Null Scan Probe"; sid:1000003; rev:1;)`,
+        },
+        affected_ips: [src],
+        affected_ports: Array.from(data.ports).slice(0, 5),
       });
     }
   }
@@ -175,6 +222,17 @@ export function detectSecurityAttacks(
           immediate_action: `Check the physical machine assigned to ${src} for malware or unauthorized scanning software.`,
           long_term_fix: "Implement micro-segmentation / private VLANs to prevent lateral peer-to-peer port sweeps between office workstations.",
         },
+        mitre_technique: {
+          id: "T1018",
+          name: "Remote System Discovery",
+          tactic: "Discovery",
+          url: "https://attack.mitre.org/techniques/T1018",
+        },
+        remediation_rules: {
+          iptables: `iptables -A INPUT -s ${src} -m limit --limit 10/min -j ACCEPT\niptables -A INPUT -s ${src} -j DROP`,
+          cisco: `access-list 105 remark Block Sweep Attacker\naccess-list 105 deny ip host ${src} any`,
+        },
+        affected_ips: [src, ...Array.from(targets).slice(0, 5)],
       });
     }
   }
@@ -219,6 +277,23 @@ export function detectSecurityAttacks(
           long_term_fix:
             "Enable Dynamic ARP Inspection (DAI) and DHCP Snooping on all managed switches so unverified ARP replies are dropped at the hardware level.",
         },
+        mitre_technique: {
+          id: "T1557.002",
+          name: "Adversary-in-the-Middle: ARP Cache Poisoning",
+          tactic: "Credential Access / Collection",
+          url: "https://attack.mitre.org/techniques/T1557/002",
+        },
+        cwe: {
+          id: "CWE-300",
+          name: "Channel Accessible by Non-Endpoint ('Man-in-the-Middle')",
+          url: "https://cwe.mitre.org/data/definitions/300.html",
+        },
+        remediation_rules: {
+          iptables: `arptables -A INPUT --source-mac ${val.mac} -j DROP`,
+          snort: `alert arp any any -> any any (msg:"PACKETFLOW: Unauthorized Gateway ARP Reply from ${val.mac}"; hwsrc:"${val.mac}"; sid:1000004; rev:1;)`,
+          cisco: `! Enable Dynamic ARP Inspection & DHCP Snooping on Cisco Catalyst\nip dhcp snooping\nip dhcp snooping vlan 1\nip arp inspection vlan 1\ninterface GigabitEthernet0/1\n description Gateway Uplink\n ip dhcp snooping trust\n ip arp inspection trust`,
+        },
+        affected_ips: [ip],
       });
     }
   }
@@ -254,6 +329,23 @@ export function detectSecurityAttacks(
         immediate_action: `Isolate host ${roguePkt.source_ip} from the network immediately.`,
         long_term_fix: "Enforce DNS over HTTPS (DoH) or enforce DNS inspection firewall rules that reject port 53 traffic originating from non-approved internal IPs.",
       },
+      mitre_technique: {
+        id: "T1584.002",
+        name: "Compromise Infrastructure: DNS Server",
+        tactic: "Resource Development",
+        url: "https://attack.mitre.org/techniques/T1584/002",
+      },
+      cwe: {
+        id: "CWE-346",
+        name: "Origin Validation Error",
+        url: "https://cwe.mitre.org/data/definitions/346.html",
+      },
+      remediation_rules: {
+        iptables: `iptables -A FORWARD -p udp --dport 53 -s ${roguePkt.source_ip} -j DROP\niptables -A INPUT -p udp --dport 53 -s ${roguePkt.source_ip} -j DROP`,
+        cisco: `access-list 120 remark Block Rogue DNS\naccess-list 120 deny udp host ${roguePkt.source_ip} any eq 53\naccess-list 120 permit ip any any`,
+      },
+      affected_ips: [roguePkt.source_ip || ""].filter(Boolean),
+      affected_ports: [53],
     });
   }
 
@@ -285,6 +377,23 @@ export function detectSecurityAttacks(
         long_term_fix:
           "Configure DHCP Snooping on all layer 2 switches, marking only the authorized router port as 'Trusted'.",
       },
+      mitre_technique: {
+        id: "T1557",
+        name: "Adversary-in-the-Middle",
+        tactic: "Credential Access",
+        url: "https://attack.mitre.org/techniques/T1557",
+      },
+      cwe: {
+        id: "CWE-300",
+        name: "Channel Accessible by Non-Endpoint",
+        url: "https://cwe.mitre.org/data/definitions/300.html",
+      },
+      remediation_rules: {
+        iptables: `iptables -A INPUT -p udp --sport 67 --dport 68 -s ! ${serverList[0] || "192.168.1.1"} -j DROP`,
+        cisco: `! Enable Cisco DHCP Snooping\nip dhcp snooping\nip dhcp snooping vlan 1\ninterface GigabitEthernet0/1\n ip dhcp snooping trust`,
+      },
+      affected_ips: serverList,
+      affected_ports: [67, 68],
     });
   }
 
@@ -326,6 +435,22 @@ export function detectSecurityAttacks(
         immediate_action: "Enable anti-spoofing egress/ingress filtering (RFC 2827) on the gateway.",
         long_term_fix: "Drop packets whose source address falls into the destination subnet at border routers.",
       },
+      mitre_technique: {
+        id: "T1498.001",
+        name: "Network Denial of Service: Direct Network Flood",
+        tactic: "Impact",
+        url: "https://attack.mitre.org/techniques/T1498/001",
+      },
+      cwe: {
+        id: "CWE-400",
+        name: "Uncontrolled Resource Consumption",
+        url: "https://cwe.mitre.org/data/definitions/400.html",
+      },
+      remediation_rules: {
+        iptables: `iptables -A INPUT -s 127.0.0.1 -i eth0 -j DROP\niptables -A INPUT -s ${landAttackPackets[0]?.source_ip} -d ${landAttackPackets[0]?.destination_ip} -j DROP`,
+        cisco: `ip access-list extended ANTI_LAND_ATTACK\n deny ip host ${landAttackPackets[0]?.source_ip} host ${landAttackPackets[0]?.destination_ip}\n permit ip any any`,
+      },
+      affected_ips: [landAttackPackets[0]?.source_ip || ""].filter(Boolean),
     });
   }
 
@@ -347,6 +472,22 @@ export function detectSecurityAttacks(
         immediate_action: `Block IP ${ep.pkt.source_ip} and audit server ${ep.pkt.destination_ip} for file system tampering.`,
         long_term_fix: "Deploy a Web Application Firewall (WAF) and sanitize all application database inputs with parameterized SQL queries.",
       },
+      mitre_technique: {
+        id: "T1190",
+        name: "Exploit Public-Facing Application",
+        tactic: "Initial Access",
+        url: "https://attack.mitre.org/techniques/T1190",
+      },
+      cwe: {
+        id: "CWE-89",
+        name: "Improper Neutralization of Special Elements used in an SQL Command ('SQL Injection')",
+        url: "https://cwe.mitre.org/data/definitions/89.html",
+      },
+      remediation_rules: {
+        iptables: `iptables -A INPUT -s ${ep.pkt.source_ip} -j DROP`,
+        snort: `alert tcp ${ep.pkt.source_ip || "any"} any -> any 80 (msg:"PACKETFLOW: Web Exploit Attempt (${ep.matched})"; content:"${ep.matched}"; nocase; sid:1000005; rev:1;)`,
+      },
+      affected_ips: [ep.pkt.source_ip || "", ep.pkt.destination_ip || ""].filter(Boolean),
     });
   }
 
@@ -382,6 +523,22 @@ export function detectSecurityAttacks(
         immediate_action: `Isolate machine ${dnsTunnelQueries[0].source_ip} and block outbound DNS lookups to the root domain.`,
         long_term_fix: "Deploy DNS RPZ (Response Policy Zones) and filter queries with anomalously long label lengths or high Shannon entropy.",
       },
+      mitre_technique: {
+        id: "T1071.004",
+        name: "Application Layer Protocol: DNS",
+        tactic: "Command and Control / Exfiltration",
+        url: "https://attack.mitre.org/techniques/T1071/004",
+      },
+      cwe: {
+        id: "CWE-200",
+        name: "Exposure of Sensitive Information",
+        url: "https://cwe.mitre.org/data/definitions/200.html",
+      },
+      remediation_rules: {
+        iptables: `iptables -A OUTPUT -p udp --dport 53 -m length --length 150:65535 -j DROP`,
+        snort: `alert udp any any -> any 53 (msg:"PACKETFLOW: High-Entropy DNS Exfiltration"; dsize:>120; content:"|00 00 10 00 01|"; sid:1000006; rev:1;)`,
+      },
+      affected_ips: [dnsTunnelQueries[0]?.source_ip || ""].filter(Boolean),
     });
   }
 

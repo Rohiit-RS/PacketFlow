@@ -181,6 +181,54 @@ export default function DocsPage() {
             </Panel>
           </div>
 
+          {/* Enterprise Capabilities */}
+          <div>
+            <SectionTitle sub="Forensic & response features">
+              Enterprise Toolset
+            </SectionTitle>
+            <Panel className="p-4 space-y-2.5 text-xs">
+              <div className="p-2.5 rounded-[8px] bg-sunk border border-rule space-y-1">
+                <span className="font-bold text-ink flex items-center gap-1.5">
+                  <Activity size={13} className="text-brand" />
+                  <span>Interactive Threat Topology (/topology)</span>
+                </span>
+                <p className="text-ink-2 text-[11px]">
+                  Real-time SVG host communication matrix with animated traffic vectors and threat halos.
+                </p>
+              </div>
+
+              <div className="p-2.5 rounded-[8px] bg-sunk border border-rule space-y-1">
+                <span className="font-bold text-ink flex items-center gap-1.5">
+                  <Wrench size={13} className="text-ok" />
+                  <span>Automated Remediation (/remediation)</span>
+                </span>
+                <p className="text-ink-2 text-[11px]">
+                  Generates ready-to-run iptables scripts, Snort/Suricata IDS rules, and Cisco configs.
+                </p>
+              </div>
+
+              <div className="p-2.5 rounded-[8px] bg-sunk border border-rule space-y-1">
+                <span className="font-bold text-ink flex items-center gap-1.5">
+                  <ShieldCheck size={13} className="text-flag" />
+                  <span>Forensic Audit & Hashes (/report)</span>
+                </span>
+                <p className="text-ink-2 text-[11px]">
+                  SHA-256 and MD5 chain-of-custody checksums with print/PDF-ready incident whitepapers.
+                </p>
+              </div>
+
+              <div className="p-2.5 rounded-[8px] bg-sunk border border-rule space-y-1">
+                <span className="font-bold text-ink flex items-center gap-1.5">
+                  <Code2 size={13} className="text-brand" />
+                  <span>Follow TCP Stream Reconstructor</span>
+                </span>
+                <p className="text-ink-2 text-[11px]">
+                  Reconstructs conversational client-server payloads in ASCII and Hex with full XSS sanitization.
+                </p>
+              </div>
+            </Panel>
+          </div>
+
           {/* Severity Classification */}
           <div>
             <SectionTitle sub="Triage hierarchy">

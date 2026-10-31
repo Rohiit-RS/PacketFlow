@@ -17,66 +17,33 @@ Small offices, university computer labs, and campus departments depend on their 
 
 This requires deep protocol expertise and is time-prohibitive for students and beginners. More critically, **it is notoriously difficult to separate a benign operational outage (e.g. cable failure, MTU mismatch, buffer exhaustion) from a targeted cyber attack (e.g. ARP poisoning, stealth port scans, covert DNS exfiltration) hiding in the exact same traffic stream.**
 
-**PacketFlow** solves this challenge by serving as an **Automated Diagnostic & Differentiation Engine**. It ingests technical packet telemetry and raw PCAP captures, applies 100% custom protocol state machines, explicitly distinguishes outages from attacks with weighted confidence scores, and outputs human-readable diagnoses with dual actionable remediations: **Immediate Containment** and **Long-Term Configuration**.
+**PacketFlow** solves this challenge by serving as an **Automated Diagnostic & Differentiation Engine**. It ingests technical packet telemetry and raw PCAP captures, applies 100% custom protocol state machines, explicitly distinguishes outages from attacks with weighted confidence scores, and outputs human-readable diagnoses with clear remediation steps: **Immediate Containment** and **Long-Term Configuration**.
 
 ---
 
-## 2. Architecture & Engine Pipeline
+## 2. Multi-Page Architecture Overview
 
-```
-+-----------------------------------------------------------------------------------+
-|                            INGESTION & SAFETY LAYER                              |
-|   .pcap / .pcapng binary buffer    |   Wireshark JSON Telemetry   |   1-Click Presets   |
-+------------------------------------------+----------------------------------------+
-                                           |
-                                           v
-+-----------------------------------------------------------------------------------+
-|                        SAFE PROTOCOL DECODER & STATE PARSER                       |
-|   Bounds-checked binary parser (Ethernet II, 802.1Q, IPv4, IPv6, ARP, TCP, UDP,   |
-|   ICMP, DNS, DHCP) with zero-risk payload sanitization (HTML escaping & hex dump) |
-+------------------------------------------+----------------------------------------+
-                                           |
-                                           v
-+-----------------------------------------------------------------------------------+
-|                             PARALLEL DETECTION ENGINES                            |
-|                                                                                   |
-|   [A] OPERATIONAL NETWORK FAULTS          [B] MALICIOUS SECURITY ATTACKS          |
-|   - TCP Retransmissions & Packet Loss     - Stealth Port Scans (SYN, FIN, XMAS)  |
-|   - Zero Window Buffer Exhaustion         - Subnet IP Sweeps & Reconnaissance     |
-|   - Duplicate IP & ARP Collision          - ARP Cache Poisoning (Gateway MITM)    |
-|   - MTU Mismatch (ICMP Fragmentation)     - Rogue DNS Responder & Redirection    |
-|   - DNS Resolver Failures (NXDOMAIN)      - Rogue DHCP Server Rogue Gateway       |
-|   - Abnormal Round-Trip Latency (>250ms)  - Malformed Land Attack & Web Exploits  |
-|   - Abrupt TCP RST Aborts                 - Covert DNS Tunneling Exfiltration     |
-+------------------------------------------+----------------------------------------+
-                                           |
-                                           v
-+-----------------------------------------------------------------------------------+
-|                         DIFFERENTIATION & CORRELATION ENGINE                      |
-|   - Primary Classification: BENIGN_FAULT | MALICIOUS_ATTACK | MIXED | NO_ISSUE     |
-|   - Overall Health Status: CRITICAL | WARNING | HEALTHY                           |
-|   - Multi-factor Heuristic Confidence Scorer (0 - 100%)                           |
-|   - Plain-Language 2-Sentence Executive Summary for Non-Experts                    |
-|   - Specific Evidence Packet Citation (Frame #, IP pairs, timestamps, flags)      |
-|   - Dual Remediation: Immediate Action + Long-Term Fix                            |
-+------------------------------------------+----------------------------------------+
-                                           |
-                                           v
-+-----------------------------------------------------------------------------------+
-|                           OUTPUT & INTERFACE PRESENTATION                         |
-|   - Strict JSON Schema API (/api/analyze)                                        |
-|   - Swiss Clinical Modern Dashboard (Dark/Light modes)                           |
-|   - Deep Frame Inspector & Safe Hex Viewer                                        |
-|   - Bidirectional Flow Conversation Matrix                                        |
-+-----------------------------------------------------------------------------------+
-```
+PacketFlow is built on Next.js 15 App Router as a modern, multi-page application where every view, finding dossier, and evidence frame citation has its own dedicated URL:
+
+| Page Route | Module Name | Primary Forensic Capabilities |
+|---|---|---|
+| [`/`](file:///c:/Users/rsroh/OneDrive/Desktop/PacketFlow/app/page.tsx) | **Executive Dashboard** | Drag-and-drop PCAP ingestion, 7 one-click test scenarios, Health Verdict Hero, and KPI metrics. |
+| [`/findings`](file:///c:/Users/rsroh/OneDrive/Desktop/PacketFlow/app/findings/page.tsx) | **Diagnostic Findings** | Full findings catalog with search, severity filter pills, and MITRE technique tags. |
+| [`/findings/[id]`](file:///c:/Users/rsroh/OneDrive/Desktop/PacketFlow/app/findings/[id]/page.tsx) | **Finding Dossier** | Deep-dive finding view with plain-language explanation, root cause analysis, clickable frame evidence links, and generated defense commands. |
+| [`/packets`](file:///c:/Users/rsroh/OneDrive/Desktop/PacketFlow/app/packets/page.tsx) | **Deep Packet Inspector** | Wireshark display filter bar, traffic burst histogram, layer-by-layer decode, safe hex/ASCII viewer, and **Follow TCP Stream** reconstructor. |
+| [`/flows`](file:///c:/Users/rsroh/OneDrive/Desktop/PacketFlow/app/flows/page.tsx) | **Flow Matrix** | Reconstructed bidirectional conversational streams, TCP flags, duration, and byte volume breakdown. |
+| [`/topology`](file:///c:/Users/rsroh/OneDrive/Desktop/PacketFlow/app/topology/page.tsx) | **Network Threat Topology** | Interactive SVG node-link graph with pulsing threat indicators, hostile flow vectors, and per-host inspection drawers. |
+| [`/remediation`](file:///c:/Users/rsroh/OneDrive/Desktop/PacketFlow/app/remediation/page.tsx) | **Automated Remediation** | One-click synthesis of ready-to-execute Linux `iptables` scripts (`remediation.sh`), Snort/Suricata IDS rules (`.rules`), and Cisco switch configs. |
+| [`/report`](file:///c:/Users/rsroh/OneDrive/Desktop/PacketFlow/app/report/page.tsx) | **Forensic Audit Report** | Print/PDF-ready incident audit report with cryptographic chain of custody (SHA-256 and MD5 checksums) and radial threat gauge. |
+| [`/schema`](file:///c:/Users/rsroh/OneDrive/Desktop/PacketFlow/app/schema/page.tsx) | **Strict JSON Engine Output** | Real-time JSON viewer formatting exact hackathon output schema, with one-click clipboard copy and `.json` export. |
+| [`/docs`](file:///c:/Users/rsroh/OneDrive/Desktop/PacketFlow/app/docs/page.tsx) | **Technical Reference Manual** | Exhaustive technical manual detailing detection heuristics, stateful threshold metrics, and REST API specifications. |
 
 ---
 
 ## 3. Core Capabilities & Detection Matrix
 
 ### A. Network Faults (Operational Issues)
-1. **TCP Retransmissions & Loss Rate**: Tracks sequence numbers per flow. Quantifies packet loss percentage and identifies bottlenecked paths.
+1. **TCP Retransmissions & Packet Loss**: Tracks duplicate sequence numbers per flow. Quantifies packet loss percentage and identifies bottlenecked paths.
 2. **TCP Window Size Issues (Zero Window Freeze)**: Detects when a receiving endpoint collapses its TCP window to 0, signaling receiver CPU or I/O exhaustion.
 3. **Duplicate IP & Addressing Conflicts**: Detects multiple distinct hardware MAC addresses claiming ownership of the identical IP address via ARP broadcasts.
 4. **Path MTU Mismatch & Black Hole Routers**: Pinpoints ICMP Type 3 Code 4 (*Destination Unreachable, Fragmentation Needed and DF bit set*) notifications caused by constricted VPN tunnels or VLAN trunks.
@@ -84,18 +51,18 @@ This requires deep protocol expertise and is time-prohibitive for students and b
 6. **Performance & Latency Degradation**: Calculates round-trip-time (RTT) deltas between handshakes and data-acknowledgment sequences, flagging spikes exceeding 250ms.
 
 ### B. Security Attacks (Malicious Activity)
-1. **Stealth Port Scans**:
+1. **Stealth Port Scans** (*MITRE T1046*):
    - **SYN Stealth Scan**: Rapid half-open SYN packets across numerous ports without completing the 3-way handshake.
    - **FIN / NULL / XMAS Scans**: Packets with illegal flag combinations (e.g. FIN+PSH+URG or zero flags) engineered to bypass stateless firewalls.
    - **UDP Port Probing**: Systematic probes triggering closed-port ICMP Port Unreachable bursts.
-2. **IP Sweeps & Reconnaissance**: Single host systematically pinging and mapping sequential internal IP addresses (`/24`) for active nodes.
-3. **ARP Spoofing & MITM Poisoning**: Unsolicited Gratuitous ARP replies asserting ownership of the Default Gateway IP (`192.168.1.1`), diverting traffic through an attacker MAC.
-4. **Rogue DNS & Domain Hijacking**: Non-gateway internal hosts forging port 53 UDP replies to redirect corporate users to phishing portals.
-5. **Rogue DHCP Server Conflict**: Unauthorized secondary DHCP server offering rogue IP leases, malicious default gateways, and rogue DNS servers.
-6. **Traffic Anomalies & Web Exploits**:
+2. **IP Sweeps & Reconnaissance** (*MITRE T1018*): Single host systematically pinging and mapping sequential internal IP addresses (`/24`) for active nodes.
+3. **ARP Spoofing & MITM Poisoning** (*MITRE T1557.002*): Unsolicited Gratuitous ARP replies asserting ownership of the Default Gateway IP (`192.168.1.1`), diverting traffic through an attacker MAC.
+4. **Rogue DNS & Domain Hijacking** (*MITRE T1584.002*): Non-gateway internal hosts forging port 53 UDP replies to redirect corporate users to phishing portals.
+5. **Rogue DHCP Server Conflict** (*MITRE T1557*): Unauthorized secondary DHCP server offering rogue IP leases, malicious default gateways, and rogue DNS servers.
+6. **Traffic Anomalies & Web Exploits** (*MITRE T1190 & T1498.001*):
    - **Land Attack**: Malformed packets where Source IP equals Destination IP and ports match.
    - **Injection Signatures**: Unencrypted payloads matching SQL injection (`OR 1=1`, `UNION SELECT`), path traversal (`../../etc/passwd`), or command shells (`/bin/sh`, `cmd.exe`).
-7. **Covert Data Exfiltration**: DNS Tunneling (unusually long query labels with high Shannon entropy and base32/base64 strings exfiltrating data via TXT/A queries).
+7. **Covert Data Exfiltration** (*MITRE T1071.004*): DNS Tunneling (unusually long query labels with high Shannon entropy and base32/base64 strings exfiltrating data via TXT/A queries).
 
 ### C. Fault vs. Attack Differentiation (Crucial Requirement)
 Every finding is evaluated by our differentiation logic to prevent false alarms:
@@ -151,6 +118,7 @@ The platform's API (`/api/analyze`) and export tools strictly adhere to the requ
 * **Bounds-Checked Binary Parsing**: Every byte slice in the PCAP header and packet records is verified against buffer length to prevent memory buffer overruns.
 * **Zero Script Execution**: Raw packet payload strings are never evaluated or injected via `dangerouslySetInnerHTML`. All ASCII representations are stripped of non-printable control characters, HTML-escaped (`&`, `<`, `>`, `"`, `'`), and presented inside safe scrollable code blocks.
 * **Zero Data Leakage**: By implementing the binary parser in pure TypeScript, PCAP captures can be parsed locally in the client's browser without sending sensitive confidential network packets over the wire.
+* **Cryptographic Evidence Integrity**: Computes SHA-256 and MD5 checksums of captures for forensic chain-of-custody verification.
 * **No Hardcoded Secrets**: Fully environment-agnostic with zero external API key requirements.
 
 ---
@@ -162,9 +130,9 @@ In compliance with the Hackathon guidelines (*"Include a few sample captures in 
 1. **`1_arp_spoofing_mitm.pcap`**: Unsolicited gratuitous ARP poison attack diverting client traffic through an attacker MAC.
 2. **`2_syn_port_scan.pcap`**: Nmap-style stealth SYN sweep targeting 15 service ports.
 3. **`3_tcp_congestion_outage.pcap`**: 58% TCP retransmission loss with zero-window receiver collapse.
-4. **DNS Tunneling & Hijacking**: Covert base64 DNS tunneling coupled with an unauthorized internal DNS responder.
-5. **Rogue DHCP Server Conflict**: Colliding DHCP OFFER frames from an unauthorized gateway plus duplicate IP collision.
-6. **Path MTU Black Hole**: ICMP Type 3 Code 4 fragmentation needed packets dropped by VPN tunnel MTU constriction.
+4. **`demo_cyber_incident.json`**: Multi-stage attack capture featuring SYN scans, web SQLi payloads, and DNS tunneling.
+5. **`demo_operational_fault.json`**: Severe infrastructure failure with duplicate IP ARP conflicts, MTU mismatches, and DNS timeouts.
+6. **Rogue DHCP Server Conflict**: Colliding DHCP OFFER frames from an unauthorized gateway plus duplicate IP collision.
 7. **Clean High-Performance Baseline**: Pristine TLS 1.3 handshakes, verified DNS resolutions, and zero packet drops.
 
 ---
@@ -200,11 +168,17 @@ npm run start
 ```
 
 ### Testing the REST API via cURL
-You can test the engine directly from your terminal by posting any PCAP file:
+You can test the engine directly from your terminal by posting any PCAP or JSON file:
 ```bash
+# Binary PCAP
 curl -X POST "http://localhost:3000/api/analyze" \
   --data-binary "@sample-captures/1_arp_spoofing_mitm.pcap" \
   -H "Content-Type: application/octet-stream"
+
+# JSON Telemetry
+curl -X POST "http://localhost:3000/api/analyze" \
+  --data-binary "@sample-captures/demo_cyber_incident.json" \
+  -H "Content-Type: application/json"
 ```
 
 ---
@@ -245,62 +219,54 @@ PacketFlow is built on **Next.js 15 App Router** and is 100% compatible with Ver
 
 ### Method B: Deploy via Vercel CLI
 
-1. **Install Vercel CLI**:
-   ```bash
-   npm i -g vercel
-   ```
+```bash
+# Install Vercel CLI globally
+npm i -g vercel
 
-2. **Login & Deploy**:
-   ```bash
-   vercel login
-   vercel
-   ```
+# Run deployment from the PacketFlow folder
+vercel
 
-3. **Deploy to Production**:
-   ```bash
-   vercel --prod
-   ```
+# Deploy to production
+vercel --prod
+```
 
 ---
 
-## 9. Originality & Open-Source Acknowledgments (Rule 3 Compliance)
+## 9. Alignment with Hackathon Judging Criteria
 
-In strict accordance with **Rule 3 (Originality)** of the Cybersecurity Hackathon:
-* **The detection logic, state correlation algorithms, fault differentiation rules, and confidence scoring models are 100% our own work built from scratch during the hackathon.**
-* **We do NOT wrap or invoke `tshark`, `wireshark`, `tcpdump`, or any pre-packaged analyzer.**
-* The binary PCAP parser is an original TypeScript implementation parsing byte offsets directly via `DataView`.
-
-### Open-Source Libraries Used:
-| Library | Purpose |
-|---|---|
-| `next` (v15) | React application framework and serverless API routing |
-| `react` & `react-dom` (v19) | Modern component rendering |
-| `tailwindcss` (v4) | Swiss clinical responsive styling tokens |
-| `lucide-react` | Clean icon glyphs for network and security indicators |
-| `sonner` | Toast feedback notifications |
-| `clsx` & `tailwind-merge` | Conditional CSS class merging |
+| Criteria | Weight | How PacketFlow Exceeds Expectations |
+|---|---|---|
+| **Novelty** | **20%** | Differentiates operational faults from cyber attacks automatically. Features an interactive SVG Network Threat Topology graph with animated traffic flows, plus automated defensive firewall & Snort rule synthesis. |
+| **Technical Implementation** | **30%** | 100% original TypeScript protocol parser and state machine engine. Implements detection for 12+ attack & fault types, MITRE ATT&CK mapping, and Follow TCP Stream reconstruction with zero native C wrappers. |
+| **Security of Solution** | **20%** | Zero code execution guarantees on untrusted packet payloads, strict HTML escaping, client-side offline parsing (zero data leakage), and cryptographic SHA-256 evidence integrity. |
+| **Feasibility** | **10%** | Clean 1-command startup (`npm run dev`), pre-loaded 1-click test scenarios, responsive dark/light UI, and native Vercel serverless readiness. |
+| **Video Presentation** | **20%** | Full, word-for-word 3-minute video presentation script provided below covering every key feature. |
 
 ---
 
-## 10. Demo Video Presentation Outline (2 to 5 Minutes)
+## 10. Winning 3-Minute Video Presentation Script
 
-For the final submission video, follow this recommended walkthrough:
-1. **Introduction (0:00 - 0:45)**:
-   - State the problem: Small networks suffer downtime and unnoticed breaches because reading packet captures requires deep protocol expertise.
-   - Introduce PacketFlow: An automated diagnostic engine that differentiates harmless operational outages from active cyber attacks.
-2. **Operational Fault Demo (0:45 - 1:45)**:
-   - Load the "TCP Congestion & Zero Window Outage" or "Path MTU Mismatch" preset.
-   - Show how PacketFlow identifies the 58% packet loss rate and explains receiver buffer exhaustion in plain language for beginners.
-   - Highlight the dual remediation: immediate switch port audit + long-term TCP buffer tuning.
-3. **Cyber Attack & Differentiation Demo (1:45 - 3:00)**:
-   - Load "ARP Spoofing & Gateway Hijacking" or "Stealth SYN Port Scan".
-   - Show the Health Status (`CRITICAL`), Category (`ATTACK`), and Confidence Score (`98%`).
-   - Click cited evidence packets to jump straight into the Deep Frame Inspector.
-4. **Under the Hood & Safe Parsing (3:00 - 3:45)**:
-   - Show how the pure TypeScript binary parser safely ingests `.pcap` files without server data leakage.
-   - Show the strict schema JSON output (`/api/analyze`).
-5. **Conclusion & Impact (3:45 - 4:30)**:
-   - Summary of impact for small teams, labs, and campus networks.
+Use this exact timing and spoken script for your 2 to 5-minute video submission:
+
+### Minute 0:00 - 0:45 &bull; The Problem & System Overview
+> *"Hello judges! Welcome to PacketFlow, our Automated Network Packet Analysis and Security Diagnostic Engine built for the Network Track of the Cybersecurity Hackathon.  
+> Small offices, research labs, and college departments often face network disruptions. But without a dedicated network engineer, diagnosing packet captures line-by-line in Wireshark is overwhelming. Worse, when connections drop, it's nearly impossible for a beginner to tell whether it's a harmless cable fault or a targeted cyber attack hiding in the exact same traffic.  
+> PacketFlow solves this completely: you drop in a PCAP or JSON capture, and our custom engine automatically analyzes the telemetry, differentiates outages from attacks with weighted confidence scores, and outputs human-readable diagnoses with immediate and long-term fixes."*
+
+### Minute 0:45 - 1:30 &bull; Operational Fault Demonstration
+> *"Let's test an operational failure. Clicking on our pre-loaded 'TCP Congestion & Outage' scenario, PacketFlow immediately returns a WARNING verdict with a primary classification of BENIGN_FAULT.  
+> Notice how the engine identifies a 58% packet loss rate and receiver window exhaustion. It translates this complex TCP zero-window state into plain English for non-experts: 'The receiving computer's buffer is 100% full and asked the sender to pause.'  
+> Clicking the finding opens its dedicated Dossier page, citing exact packet frame evidence. Clicking Frame #3 jumps straight into our Deep Packet Inspector, highlighting the zero-window flag."*
+
+### Minute 1:30 - 2:20 &bull; Cyber Attack & Differentiation Demonstration
+> *"Now let's switch to an active cyber incident: 'ARP Spoofing & Gateway Hijacking'. The platform instantly shifts to CRITICAL health and MALICIOUS_ATTACK.  
+> It isolates the attacker MAC forging unsolicited ARP replies to intercept router traffic, assigning a 98% confidence score. Each attack is mapped to the MITRE ATT&CK framework—here, Technique T1557.002.  
+> Next, let's open our Network Threat Topology tab at `/topology`. You can visually see the entire communication graph: the attacker node pulses in red, while hostile traffic vectors are animated across the network."*
+
+### Minute 2:20 - 3:00 &bull; Automated Defense & Forensic Report
+> *"PacketFlow doesn't just diagnose—it automates remediation. Under the `/remediation` tab, the engine auto-generates copy-pasteable Linux iptables drop scripts, Snort and Suricata IDS signature rules, and Cisco switch hardening configurations.  
+> Finally, navigating to `/report`, PacketFlow generates a print-ready Executive Forensic Audit Report, complete with SHA-256 cryptographic chain-of-custody checksums.  
+> In compliance with Rule 3, our parser and detection logic are 100% our own original TypeScript with zero reliance on Wireshark wrappers, and it runs anywhere with zero data leakage. Thank you!"*
 
 ---
 

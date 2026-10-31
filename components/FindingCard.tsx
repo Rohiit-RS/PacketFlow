@@ -88,6 +88,12 @@ export function FindingCard({ finding, onSelectEvidence }: FindingCardProps) {
               {finding.confidence_score}%
             </span>
           </div>
+
+          {finding.mitre_technique && (
+            <span className="px-2 py-0.5 rounded text-[10px] font-mono bg-red-500/10 text-red-600 border border-red-500/20 font-bold">
+              MITRE {finding.mitre_technique.id}
+            </span>
+          )}
         </div>
 
         <div className="flex items-center gap-3 self-end sm:self-auto">

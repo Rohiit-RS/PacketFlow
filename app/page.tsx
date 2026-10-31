@@ -236,14 +236,38 @@ export default function Home() {
 
           {/* Quick Tool Links */}
           <div className="grid grid-cols-2 gap-3 pt-1">
-            <Link href="/packets" className="block group">
+            <Link href="/topology" className="block group">
               <Panel className="p-3.5 hover:border-brand transition-colors text-xs">
                 <div className="flex items-center gap-1.5 font-bold text-ink mb-1 group-hover:text-brand">
-                  <Layers size={14} className="text-brand" />
-                  <span>Packet Stream</span>
+                  <Activity size={14} className="text-brand" />
+                  <span>Threat Topology</span>
                 </div>
                 <p className="text-ink-2 text-[11px] line-clamp-2">
-                  Inspect frame hex, headers, and protocol layers.
+                  Interactive node-link graph with animated threat vectors.
+                </p>
+              </Panel>
+            </Link>
+
+            <Link href="/remediation" className="block group">
+              <Panel className="p-3.5 hover:border-brand transition-colors text-xs">
+                <div className="flex items-center gap-1.5 font-bold text-ink mb-1 group-hover:text-brand">
+                  <Wrench size={14} className="text-ok" />
+                  <span>Automated Fixes</span>
+                </div>
+                <p className="text-ink-2 text-[11px] line-clamp-2">
+                  Generate iptables scripts, Snort rules, and Cisco configs.
+                </p>
+              </Panel>
+            </Link>
+
+            <Link href="/report" className="block group">
+              <Panel className="p-3.5 hover:border-brand transition-colors text-xs">
+                <div className="flex items-center gap-1.5 font-bold text-ink mb-1 group-hover:text-brand">
+                  <ShieldAlert size={14} className="text-flag" />
+                  <span>Forensic Audit</span>
+                </div>
+                <p className="text-ink-2 text-[11px] line-clamp-2">
+                  Executive PDF-ready incident report with SHA-256 hash.
                 </p>
               </Panel>
             </Link>
@@ -255,7 +279,7 @@ export default function Home() {
                   <span>Strict JSON API</span>
                 </div>
                 <p className="text-ink-2 text-[11px] line-clamp-2">
-                  Export report in strict diagnosis schema.
+                  Live JSON schema output and offline REST endpoint.
                 </p>
               </Panel>
             </Link>

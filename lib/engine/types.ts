@@ -25,6 +25,25 @@ export interface RecommendedRemediation {
   long_term_fix: string;
 }
 
+export interface MitreTechnique {
+  id: string; // e.g. "T1046"
+  name: string; // e.g. "Network Service Discovery"
+  tactic: string; // e.g. "Discovery"
+  url: string; // e.g. "https://attack.mitre.org/techniques/T1046"
+}
+
+export interface CweMapping {
+  id: string; // e.g. "CWE-300"
+  name: string; // e.g. "Channel Accessible by Non-Endpoint"
+  url: string;
+}
+
+export interface RemediationRules {
+  iptables?: string;
+  snort?: string;
+  cisco?: string;
+}
+
 export interface Finding {
   id: string; // e.g., "FINDING-001"
   category: FindingCategory;
@@ -34,6 +53,13 @@ export interface Finding {
   plain_language_explanation: string;
   technical_details: FindingTechnicalDetails;
   recommended_remediation: RecommendedRemediation;
+  
+  // Advanced enriched metadata for enterprise forensics & mitigation
+  mitre_technique?: MitreTechnique;
+  cwe?: CweMapping;
+  remediation_rules?: RemediationRules;
+  affected_ips?: string[];
+  affected_ports?: number[];
 }
 
 export interface DiagnosticSummary {
@@ -141,5 +167,8 @@ export interface AnalysisEngineResult {
     protocols: Record<string, number>;
     top_sources: { ip: string; count: number }[];
     top_destinations: { ip: string; count: number }[];
+    capture_sha256?: string;
+    capture_md5?: string;
+    timeline_histogram?: { time_bucket: number; count: number; attacks: number; bytes: number }[];
   };
 }

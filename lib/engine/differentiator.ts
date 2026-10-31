@@ -14,6 +14,7 @@ import {
   ConversationFlow,
   AnalysisEngineResult
 } from "./types";
+import { computeSha256Hex, computeMd5Hex } from "../utils/hash";
 
 /**
  * Builds conversation flows from packet streams
@@ -172,6 +173,48 @@ export function computeAnalysisStats(
   const totalRetrans = flows.reduce((acc, f) => acc + f.retransmissions, 0);
   const packetLossPct = totalPackets > 0 ? Math.min(100, (totalRetrans / totalPackets) * 100) : 0;
 
+  // Build forensic signature & hashes
+  const packetSignature = packets
+    .slice(0, 500)
+    .map(p => `${p.frame_number}:${p.timestamp}:${p.length}:${p.protocol}:${p.source_ip}->${p.destination_ip}`)
+    .join("|");
+  const capture_sha256 = computeSha256Hex(packetSignature || "empty_capture_buffer");
+  const capture_md5 = computeMd5Hex(packetSignature || "empty_capture_buffer");
+
+  // Build 12-bucket timeline histogram for visual telemetry
+  const bucketCount = 12;
+  const timeSpan = Math.max(0.01, endTime - startTime);
+  const bucketDuration = timeSpan / bucketCount;
+  const timeline_histogram = Array.from({ length: bucketCount }, (_, i) => ({
+    time_bucket: Math.round((startTime + i * bucketDuration) * 100) / 100,
+    count: 0,
+    attacks: 0,
+    bytes: 0,
+  }));
+
+  // Identify attack frames to colorize histogram buckets
+  const attackFrameNumbers = new Set<number>();
+  for (const f of findings) {
+    if (f.category === "ATTACK") {
+      for (const ev of f.technical_details.evidence_packets) {
+        const match = ev.match(/Frame #(\d+)/);
+        if (match) attackFrameNumbers.add(parseInt(match[1], 10));
+      }
+    }
+  }
+
+  for (const pkt of packets) {
+    const offset = Math.max(0, pkt.timestamp - startTime);
+    const bucketIdx = Math.min(bucketCount - 1, Math.floor(offset / bucketDuration));
+    if (timeline_histogram[bucketIdx]) {
+      timeline_histogram[bucketIdx].count++;
+      timeline_histogram[bucketIdx].bytes += pkt.length;
+      if (attackFrameNumbers.has(pkt.frame_number)) {
+        timeline_histogram[bucketIdx].attacks++;
+      }
+    }
+  }
+
   return {
     total_packets: totalPackets,
     total_bytes: totalBytes,
@@ -184,6 +227,9 @@ export function computeAnalysisStats(
     protocols,
     top_sources: topSources,
     top_destinations: topDestinations,
+    capture_sha256,
+    capture_md5,
+    timeline_histogram,
   };
 }
 

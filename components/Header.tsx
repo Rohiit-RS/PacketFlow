@@ -10,6 +10,9 @@ import {
   BookOpen,
   Download,
   Sparkles,
+  Network,
+  Wrench,
+  FileText,
 } from "lucide-react";
 import { Wordmark } from "./shell/Logo";
 import { ThemeToggle } from "./shell/ThemeToggle";
@@ -45,8 +48,11 @@ export function Header() {
     { href: "/findings", label: "Findings", icon: ShieldAlert, badge: findingsCount },
     { href: "/packets", label: "Packets", icon: Layers, badge: packetsCount },
     { href: "/flows", label: "Flows", icon: ArrowDownUp, badge: flowsCount },
-    { href: "/schema", label: "JSON Schema", icon: FileJson, badge: null },
-    { href: "/docs", label: "Documentation", icon: BookOpen, badge: null },
+    { href: "/topology", label: "Topology", icon: Network, badge: null },
+    { href: "/remediation", label: "Remediation", icon: Wrench, badge: null },
+    { href: "/report", label: "Report", icon: FileText, badge: null },
+    { href: "/schema", label: "JSON", icon: FileJson, badge: null },
+    { href: "/docs", label: "Docs", icon: BookOpen, badge: null },
   ];
 
   return (

@@ -80,6 +80,16 @@ export function detectNetworkFaults(
           long_term_fix:
             "Enable flow control/QoS prioritization, replace degraded Ethernet patch cables, and optimize TCP buffer windows.",
         },
+        cwe: {
+          id: "CWE-400",
+          name: "Uncontrolled Resource Consumption",
+          url: "https://cwe.mitre.org/data/definitions/400.html",
+        },
+        remediation_rules: {
+          iptables: `sysctl -w net.ipv4.tcp_retries2=8\nsysctl -w net.ipv4.tcp_sack=1`,
+          cisco: `interface GigabitEthernet0/1\n flowcontrol receive on\n flowcontrol send on`,
+        },
+        affected_ips: Array.from(new Set(retransmissionPackets.map(p => p.source_ip || "").filter(Boolean))).slice(0, 5),
       });
     }
   }
@@ -108,6 +118,15 @@ export function detectNetworkFaults(
         long_term_fix:
           "Tune operating system TCP socket buffer sizing (`SO_RCVBUF`) and optimize application multi-threading.",
       },
+      cwe: {
+        id: "CWE-400",
+        name: "Uncontrolled Resource Consumption (Buffer Exhaustion)",
+        url: "https://cwe.mitre.org/data/definitions/400.html",
+      },
+      remediation_rules: {
+        iptables: `sysctl -w net.ipv4.tcp_rmem="4096 87380 6291456"\nsysctl -w net.core.rmem_max=16777216`,
+      },
+      affected_ips: Array.from(new Set(zeroWindowPackets.map(p => p.source_ip || "").filter(Boolean))),
     });
   }
 
@@ -153,6 +172,15 @@ export function detectNetworkFaults(
           long_term_fix:
             "Enforce DHCP snooping and IP Source Guard on managed switch trunks, and reserve static assignments outside the active DHCP pool.",
         },
+        cwe: {
+          id: "CWE-436",
+          name: "Interpretation Conflict",
+          url: "https://cwe.mitre.org/data/definitions/436.html",
+        },
+        remediation_rules: {
+          cisco: `! Cisco Port Security & IP Source Guard\ninterface GigabitEthernet0/2\n switchport mode access\n switchport port-security\n switchport port-security maximum 1\n switchport port-security violation restrict\n ip verify source`,
+        },
+        affected_ips: [ip],
       });
     }
   }
@@ -184,6 +212,16 @@ export function detectNetworkFaults(
         long_term_fix:
           "Ensure ICMP Type 3 Code 4 messages are not filtered by local host firewalls to allow Path MTU Discovery (PMTUD) to negotiate automatically.",
       },
+      cwe: {
+        id: "CWE-436",
+        name: "Interpretation Conflict",
+        url: "https://cwe.mitre.org/data/definitions/436.html",
+      },
+      remediation_rules: {
+        iptables: `iptables -t mangle -A POSTROUTING -p tcp --tcp-flags SYN,RST SYN -o eth0 -j TCPMSS --clamp-mss-to-pmtu`,
+        cisco: `interface GigabitEthernet0/1\n ip tcp adjust-mss 1360`,
+      },
+      affected_ips: Array.from(new Set(mtuIssues.map(p => p.source_ip || "").filter(Boolean))),
     });
   }
 
@@ -232,6 +270,15 @@ export function detectNetworkFaults(
         long_term_fix:
           "Configure redundant upstream DNS forwarders in the local gateway and verify internal split-horizon DNS routing.",
       },
+      cwe: {
+        id: "CWE-778",
+        name: "Insufficient Logging & Service Availability",
+        url: "https://cwe.mitre.org/data/definitions/778.html",
+      },
+      remediation_rules: {
+        iptables: `# Configure fallback upstream resolvers\nresolvectl dns eth0 1.1.1.1 8.8.8.8 9.9.9.9`,
+      },
+      affected_ips: Array.from(new Set(dnsFailures.map(p => p.source_ip || "").filter(Boolean))),
     });
   }
 
@@ -260,6 +307,15 @@ export function detectNetworkFaults(
         long_term_fix:
           "Implement Active Queue Management (Cake or FQ-CoDel SQM) on the WAN edge router to eradicate bufferbloat during concurrent uploads/downloads.",
       },
+      cwe: {
+        id: "CWE-400",
+        name: "Uncontrolled Resource Consumption (Network Latency Bufferbloat)",
+        url: "https://cwe.mitre.org/data/definitions/400.html",
+      },
+      remediation_rules: {
+        iptables: `# Enable FQ-CoDel Smart Queue Management on WAN interface\ntc qdisc add dev eth0 root fq_codel`,
+      },
+      affected_ips: highLatencyFlows.map(f => f.source.split(":")[0]),
     });
   }
 

@@ -2,7 +2,6 @@
 
 import { use } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import {
   ArrowLeft,
   ShieldAlert,
@@ -118,6 +117,30 @@ export default function FindingDetailPage({ params }: FindingPageProps) {
             <span>Diagnostic Confidence:</span>
             <span className="font-bold text-ok">{finding.confidence_score}%</span>
           </div>
+
+          {finding.mitre_technique && (
+            <a
+              href={finding.mitre_technique.url}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center gap-1.5 rounded-full border border-red-500/30 bg-red-500/10 px-3 py-0.5 text-xs text-red-600 font-mono hover:underline"
+            >
+              <span>MITRE: {finding.mitre_technique.id} ({finding.mitre_technique.name})</span>
+              <ExternalLink size={10} />
+            </a>
+          )}
+
+          {finding.cwe && (
+            <a
+              href={finding.cwe.url}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center gap-1.5 rounded-full border border-blue-500/30 bg-blue-500/10 px-3 py-0.5 text-xs text-blue-600 font-mono hover:underline"
+            >
+              <span>{finding.cwe.id}</span>
+              <ExternalLink size={10} />
+            </a>
+          )}
         </div>
 
         <h1 className="text-2xl sm:text-3xl font-bold tracking-[-0.022em] text-ink mb-3">
@@ -229,6 +252,62 @@ export default function FindingDetailPage({ params }: FindingPageProps) {
           </div>
         </div>
       </Panel>
+
+      {/* Enterprise Defensive Rule Snippets */}
+      {finding.remediation_rules && (
+        <Panel className="p-6 space-y-4">
+          <div className="flex items-center justify-between">
+            <SectionTitle sub="Synthesized machine-readable rules for immediate perimeter enforcement">
+              Generated Defense Signatures &amp; Firewall Rules
+            </SectionTitle>
+            <Link
+              href="/remediation"
+              className="text-xs font-semibold text-brand hover:underline inline-flex items-center gap-1"
+            >
+              <span>View Full Incident Remediation</span>
+              <ExternalLink size={13} />
+            </Link>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {finding.remediation_rules.iptables && (
+              <div className="p-4 bg-sunk rounded-[10px] border border-rule space-y-2">
+                <div className="flex items-center gap-1.5 text-xs font-bold font-mono text-ink uppercase">
+                  <Terminal size={14} className="text-brand" />
+                  <span>Linux iptables / sysctl</span>
+                </div>
+                <pre className="p-2.5 rounded-[6px] bg-canvas border border-rule font-mono text-[11px] text-ink overflow-x-auto whitespace-pre">
+                  {finding.remediation_rules.iptables}
+                </pre>
+              </div>
+            )}
+
+            {finding.remediation_rules.snort && (
+              <div className="p-4 bg-sunk rounded-[10px] border border-rule space-y-2">
+                <div className="flex items-center gap-1.5 text-xs font-bold font-mono text-ink uppercase">
+                  <ShieldCheck size={14} className="text-ok" />
+                  <span>Snort / Suricata IDS Signature</span>
+                </div>
+                <pre className="p-2.5 rounded-[6px] bg-canvas border border-rule font-mono text-[11px] text-ink overflow-x-auto whitespace-pre">
+                  {finding.remediation_rules.snort}
+                </pre>
+              </div>
+            )}
+
+            {finding.remediation_rules.cisco && (
+              <div className="p-4 bg-sunk rounded-[10px] border border-rule space-y-2 md:col-span-2">
+                <div className="flex items-center gap-1.5 text-xs font-bold font-mono text-ink uppercase">
+                  <Wrench size={14} className="text-blue-600" />
+                  <span>Cisco Switch / Router IOS Hardening</span>
+                </div>
+                <pre className="p-2.5 rounded-[6px] bg-canvas border border-rule font-mono text-[11px] text-ink overflow-x-auto whitespace-pre">
+                  {finding.remediation_rules.cisco}
+                </pre>
+              </div>
+            )}
+          </div>
+        </Panel>
+      )}
 
       {/* Back Button Footer */}
       <div className="pt-2 flex justify-between items-center">

@@ -129,20 +129,20 @@ export function ForensicReport({ analysisResult, captureName }: ForensicReportPr
           </div>
         </div>
 
-        {/* Executive Verdict & Risk Score Section */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
-          {/* Radial Score Gauge (4 cols) */}
-          <div className="lg:col-span-4 p-6 bg-canvas border border-rule rounded-card flex flex-col items-center justify-center text-center">
-            <div className="text-[11px] uppercase font-bold text-ink-2 tracking-wider">
+        {/* Executive Verdict & Risk Score Section (Symmetric 50/50 Layout) */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-stretch">
+          {/* Radial Score Gauge (Left Equal Box) */}
+          <div className="p-8 bg-canvas border border-rule rounded-2xl flex flex-col items-center justify-between text-center h-full shadow-xs">
+            <div className="text-xs uppercase font-bold text-ink-3 tracking-wider">
               Composite Threat Risk Score
             </div>
 
             {/* Circular Gauge SVG */}
-            <div className="relative w-32 h-32 my-3 flex items-center justify-center">
+            <div className="relative w-36 h-36 my-4 flex items-center justify-center">
               <svg className="w-full h-full -rotate-90" viewBox="0 0 36 36">
                 <path
                   className="text-rule-soft"
-                  strokeWidth="3.5"
+                  strokeWidth="3"
                   stroke="currentColor"
                   fill="none"
                   d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
@@ -156,7 +156,7 @@ export function ForensicReport({ analysisResult, captureName }: ForensicReportPr
                       : "text-green-600"
                   )}
                   strokeDasharray={`${riskScore}, 100`}
-                  strokeWidth="3.5"
+                  strokeWidth="3.2"
                   strokeLinecap="round"
                   stroke="currentColor"
                   fill="none"
@@ -164,10 +164,10 @@ export function ForensicReport({ analysisResult, captureName }: ForensicReportPr
                 />
               </svg>
               <div className="absolute flex flex-col items-center justify-center">
-                <span className="text-3xl font-extrabold font-mono text-ink">
+                <span className="text-4xl font-extrabold font-mono text-ink">
                   {riskScore}
                 </span>
-                <span className="text-[9px] font-mono text-ink-2">OUT OF 100</span>
+                <span className="text-[10px] font-mono text-ink-3 uppercase font-bold">OUT OF 100</span>
               </div>
             </div>
 
@@ -180,40 +180,40 @@ export function ForensicReport({ analysisResult, captureName }: ForensicReportPr
                   : "ok"
               }
             >
-              {summary.overall_health_status} HEALTH
+              {summary.overall_health_status} STATUS
             </Chip>
           </div>
 
-          {/* Classification & Plain Summary (8 cols) */}
-          <div className="lg:col-span-8 space-y-4">
+          {/* Classification & Plain Summary (Right Equal Box) */}
+          <div className="p-8 bg-canvas border border-rule rounded-2xl flex flex-col justify-between h-full space-y-4 shadow-xs">
             <div>
-              <div className="text-[11px] font-mono uppercase text-ink-2 font-bold tracking-wider">
+              <div className="text-xs font-mono uppercase text-ink-3 font-bold tracking-wider">
                 Primary Diagnostic Classification
               </div>
-              <h2 className="text-xl font-bold text-ink mt-0.5">
+              <h2 className="text-2xl font-bold text-ink mt-1">
                 {summary.primary_classification.replace("_", " ")}
               </h2>
             </div>
 
-            <div className="p-4 bg-sunk rounded-[10px] border border-rule text-sm leading-relaxed text-ink">
-              <span className="font-semibold block text-xs uppercase text-ink-2 mb-1">
+            <div className="p-5 bg-sunk/60 rounded-xl border border-rule text-base leading-relaxed text-ink">
+              <span className="font-bold block text-xs uppercase tracking-wider text-ink-3 mb-1">
                 Executive Plain-Language Summary:
               </span>
               {summary.executive_summary}
             </div>
 
             <div className="grid grid-cols-3 gap-3 text-center">
-              <div className="p-3 bg-canvas border border-rule rounded-[8px]">
-                <div className="text-[10px] uppercase font-bold text-ink-2">Attacks Detected</div>
-                <div className="text-lg font-bold font-mono text-red-600 mt-0.5">{stats.attack_count}</div>
+              <div className="p-3.5 bg-raised border border-rule rounded-xl">
+                <div className="text-xs uppercase font-bold text-ink-3">Attacks</div>
+                <div className="text-xl font-bold font-mono text-red-600 mt-1">{stats.attack_count}</div>
               </div>
-              <div className="p-3 bg-canvas border border-rule rounded-[8px]">
-                <div className="text-[10px] uppercase font-bold text-ink-2">Faults Detected</div>
-                <div className="text-lg font-bold font-mono text-amber-600 mt-0.5">{stats.fault_count}</div>
+              <div className="p-3.5 bg-raised border border-rule rounded-xl">
+                <div className="text-xs uppercase font-bold text-ink-3">Faults</div>
+                <div className="text-xl font-bold font-mono text-amber-600 mt-1">{stats.fault_count}</div>
               </div>
-              <div className="p-3 bg-canvas border border-rule rounded-[8px]">
-                <div className="text-[10px] uppercase font-bold text-ink-2">Packet Loss Ratio</div>
-                <div className="text-lg font-bold font-mono text-ink mt-0.5">{stats.packet_loss_percentage}%</div>
+              <div className="p-3.5 bg-raised border border-rule rounded-xl">
+                <div className="text-xs uppercase font-bold text-ink-3">Packet Loss</div>
+                <div className="text-xl font-bold font-mono text-ink mt-1">{stats.packet_loss_percentage}%</div>
               </div>
             </div>
           </div>

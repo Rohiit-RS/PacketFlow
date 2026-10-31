@@ -11,7 +11,6 @@ import {
   X,
   Copy,
   Check,
-  Activity,
   Code2,
 } from "lucide-react";
 import { Button, Chip, Panel, SectionTitle, Swatch, cn } from "./ui";
@@ -43,13 +42,12 @@ export function PacketInspector({
 
   // Quick Display Filters (Wireshark-style)
   const quickFilters = [
-    { label: "tcp.flags.syn == 1", filter: "syn" },
-    { label: "tcp.flags.reset == 1", filter: "rst" },
+    { label: "tcp.syn", filter: "syn" },
+    { label: "tcp.rst", filter: "rst" },
     { label: "retransmission", filter: "retransmission" },
     { label: "arp", filter: "arp" },
     { label: "dns", filter: "dns" },
     { label: "icmp", filter: "icmp" },
-    { label: "len > 100", filter: "len100" },
   ];
 
   const applyQuickFilter = (qf: string) => {
@@ -74,7 +72,6 @@ export function PacketInspector({
       if (q === "arp") return matchProto && p.protocol === "ARP";
       if (q === "dns") return matchProto && p.protocol === "DNS";
       if (q === "icmp") return matchProto && p.protocol === "ICMP";
-      if (q === "len100") return matchProto && p.length > 100;
 
       // Free-text search
       const matchSearch =
@@ -84,8 +81,7 @@ export function PacketInspector({
         (p.source_port && p.source_port.toString().includes(q)) ||
         (p.destination_port && p.destination_port.toString().includes(q)) ||
         (p.info && p.info.toLowerCase().includes(q)) ||
-        (p.dns_query && p.dns_query.toLowerCase().includes(q)) ||
-        (p.payload_preview && p.payload_preview.toLowerCase().includes(q));
+        (p.dns_query && p.dns_query.toLowerCase().includes(q));
 
       return matchProto && matchSearch;
     });
@@ -120,28 +116,6 @@ export function PacketInspector({
     };
   }, [packets, inspectPacket]);
 
-  // Mini timeline histogram
-  const timelineHistogram = useMemo(() => {
-    if (packets.length === 0) return [];
-    const minTime = packets[0].timestamp;
-    const maxTime = packets[packets.length - 1].timestamp;
-    const duration = Math.max(0.1, maxTime - minTime);
-    const bins = 16;
-    const binWidth = duration / bins;
-
-    const counts = Array.from({ length: bins }, () => 0);
-    packets.forEach(p => {
-      const idx = Math.min(bins - 1, Math.floor((p.timestamp - minTime) / binWidth));
-      counts[idx]++;
-    });
-    const maxCount = Math.max(1, ...counts);
-    return counts.map((count, i) => ({
-      count,
-      pct: (count / maxCount) * 100,
-      time: (minTime + i * binWidth).toFixed(2),
-    }));
-  }, [packets]);
-
   const getProtocolColor = (proto: string) => {
     switch (proto) {
       case "TCP":
@@ -169,62 +143,44 @@ export function PacketInspector({
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       {/* Header with Search and Clear */}
-      <SectionTitle
-        sub="Deep frame analysis, protocol layer decoding, and bounds-checked hex payload viewer"
-        action={
-          <div className="flex items-center gap-2">
-            <div className="relative">
-              <Search
-                size={14}
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-3"
-              />
-              <input
-                type="text"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder="Wireshark filter or IP, port, flag..."
-                className="pl-8 pr-3 py-1.5 bg-sunk rounded-[10px] text-xs text-ink border border-rule focus:outline-none focus:border-brand w-56 sm:w-72 font-mono"
-              />
-            </div>
-            {search && (
-              <Button variant="ghost" size="sm" onClick={() => setSearch("")}>
-                Clear
-              </Button>
-            )}
-          </div>
-        }
-      >
-        Packet Stream ({filteredPackets.length} / {packets.length})
-      </SectionTitle>
-
-      {/* Mini Visual Traffic Timeline */}
-      <div className="p-3 bg-raised border border-rule rounded-[10px] flex items-center justify-between gap-4">
-        <div className="flex items-center gap-2 text-xs font-semibold text-ink-2 shrink-0">
-          <Activity size={14} className="text-brand" />
-          <span>Traffic Burst Histogram</span>
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div>
+          <h2 className="text-xl font-bold tracking-tight text-ink">
+            Packet Stream ({filteredPackets.length} of {packets.length} frames)
+          </h2>
+          <p className="text-sm text-ink-2 mt-0.5">
+            Deep frame analysis, protocol layer decoding, and bounds-checked hex viewer
+          </p>
         </div>
 
-        <div className="flex items-end gap-1 flex-1 h-6 px-2">
-          {timelineHistogram.map((bin, i) => (
-            <div
-              key={i}
-              className="flex-1 bg-brand/30 hover:bg-brand rounded-t-[2px] transition-colors cursor-pointer"
-              style={{ height: `${Math.max(15, bin.pct)}%` }}
-              title={`Time ${bin.time}s: ${bin.count} packets`}
+        <div className="flex items-center gap-2.5 w-full sm:w-auto">
+          <div className="relative flex-1 sm:flex-initial">
+            <Search
+              size={15}
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-3"
             />
-          ))}
-        </div>
-
-        <div className="text-[11px] font-mono text-ink-3 shrink-0">
-          {packets.length > 0 ? `${packets[0].timestamp.toFixed(2)}s - ${packets[packets.length - 1].timestamp.toFixed(2)}s` : ""}
+            <input
+              type="text"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search IP, port, flag..."
+              className="pl-9 pr-3 py-2 bg-sunk rounded-xl text-sm text-ink border border-rule focus:outline-none focus:border-brand w-full sm:w-72 font-mono"
+            />
+          </div>
+          {search && (
+            <Button variant="ghost" size="sm" onClick={() => setSearch("")}>
+              Clear
+            </Button>
+          )}
         </div>
       </div>
 
-      {/* Wireshark Quick Filter Pills */}
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <div className="flex flex-wrap items-center gap-1.5">
+      {/* Protocol & Quick Filter Bar */}
+      <div className="flex flex-wrap items-center justify-between gap-3 p-4 bg-raised border border-rule rounded-xl">
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="text-xs uppercase font-bold text-ink-3 mr-1">Protocols:</span>
           {protocols.map((proto) => (
             <button
               key={proto}
@@ -237,21 +193,20 @@ export function PacketInspector({
                   : "bg-raised text-ink-2 border-rule hover:border-rule-strong hover:bg-sunk"
               )}
             >
-              {proto !== "ALL" && <Swatch color={getProtocolColor(proto)} />}
+              {proto !== "ALL" && <Swatch color={getProtocolColor(proto)} className="w-2 h-2 rounded-full" />}
               <span>{proto}</span>
             </button>
           ))}
         </div>
 
-        {/* Display Filter Syntax Pills */}
-        <div className="flex flex-wrap items-center gap-1">
-          <span className="text-[10px] uppercase font-bold text-ink-3 mr-1">Quick Filters:</span>
+        <div className="flex flex-wrap items-center gap-1.5">
+          <span className="text-xs uppercase font-bold text-ink-3 mr-1">Quick Filters:</span>
           {quickFilters.map((qf) => (
             <button
               key={qf.filter}
               onClick={() => applyQuickFilter(qf.filter)}
               className={cn(
-                "px-2 py-0.5 rounded-[6px] text-[10px] font-mono border transition-colors",
+                "px-2.5 py-1 rounded-lg text-xs font-mono border transition-colors",
                 search === qf.filter
                   ? "bg-ink text-canvas border-ink font-bold"
                   : "bg-sunk text-ink-2 border-rule-soft hover:bg-raised"
@@ -263,28 +218,28 @@ export function PacketInspector({
         </div>
       </div>
 
-      {/* Two Column Layout: Dense Swiss Table & Frame Inspector */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
-        {/* Left: Dense Swiss Table */}
-        <Panel className="lg:col-span-7 overflow-hidden flex flex-col h-[520px]">
-          <div className="overflow-y-auto flex-1 font-mono text-xs">
-            <table className="chart">
+      {/* Symmetric Two-Column Layout (50/50 Grid) */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
+        {/* Left: Symmetric Dense Table (Equal Height) */}
+        <Panel className="p-0 overflow-hidden flex flex-col h-[580px] border border-rule shadow-xs">
+          <div className="overflow-y-auto flex-1 font-mono text-sm">
+            <table className="chart w-full">
               <thead>
                 <tr>
                   <th className="w-12">#</th>
-                  <th>Time (s)</th>
+                  <th>Time</th>
                   <th>Source</th>
                   <th>Destination</th>
                   <th>Proto</th>
-                  <th>Bytes</th>
-                  <th>Protocol Info</th>
+                  <th>Len</th>
+                  <th>Info</th>
                 </tr>
               </thead>
               <tbody>
                 {filteredPackets.length === 0 ? (
                   <tr>
-                    <td colSpan={7} className="text-center py-12 text-ink-3 font-sans text-xs">
-                      No packets matched search filter.
+                    <td colSpan={7} className="text-center py-16 text-ink-3 font-sans text-sm">
+                      No frames matched search query.
                     </td>
                   </tr>
                 ) : (
@@ -305,25 +260,21 @@ export function PacketInspector({
                             ? "bg-warn-soft/40"
                             : isRst
                             ? "bg-flag-soft/30"
-                            : ""
+                            : "hover:bg-sunk/50"
                         )}
                       >
-                        <td className="font-sans font-semibold text-ink-3">
-                          {pkt.frame_number}
-                        </td>
-                        <td className="text-ink-2">
-                          {pkt.timestamp.toFixed(3)}
-                        </td>
-                        <td className="text-ink truncate max-w-[120px]">
+                        <td className="font-semibold text-ink-3">{pkt.frame_number}</td>
+                        <td className="text-ink-2">{pkt.timestamp.toFixed(3)}</td>
+                        <td className="text-ink truncate max-w-[130px]">
                           {pkt.source_ip || pkt.source_mac || "Local"}
                         </td>
-                        <td className="text-ink truncate max-w-[120px]">
+                        <td className="text-ink truncate max-w-[130px]">
                           {pkt.destination_ip || pkt.destination_mac || "Broadcast"}
                         </td>
                         <td>
                           <div className="flex items-center gap-1.5">
-                            <Swatch color={getProtocolColor(pkt.protocol)} />
-                            <span className="font-sans text-[11px] font-semibold">{pkt.protocol}</span>
+                            <Swatch color={getProtocolColor(pkt.protocol)} className="w-2 h-2 rounded-full" />
+                            <span className="font-semibold text-xs">{pkt.protocol}</span>
                           </div>
                         </td>
                         <td className="text-ink-2">{pkt.length}</td>
@@ -339,20 +290,20 @@ export function PacketInspector({
           </div>
         </Panel>
 
-        {/* Right: Decoded Protocol Layers & Hex Dump */}
-        <Panel className="lg:col-span-5 p-4 flex flex-col h-[520px] overflow-hidden">
+        {/* Right: Symmetric Protocol Layers & Hex Dump (Equal Height) */}
+        <Panel className="p-6 flex flex-col h-[580px] overflow-hidden border border-rule shadow-xs">
           {inspectPacket ? (
             <div className="flex flex-col h-full overflow-hidden">
-              <div className="flex items-center justify-between pb-3 border-b border-rule mb-3">
-                <div className="flex items-center gap-2">
-                  <span className="font-bold text-sm text-ink font-mono">
+              <div className="flex items-center justify-between pb-4 border-b border-rule mb-4">
+                <div className="flex items-center gap-3">
+                  <span className="font-extrabold text-base text-ink font-mono">
                     Frame #{inspectPacket.frame_number}
                   </span>
-                  <Chip tone="brand" className="text-xs">
-                    <Swatch color={getProtocolColor(inspectPacket.protocol)} />
+                  <Chip tone="brand">
+                    <Swatch color={getProtocolColor(inspectPacket.protocol)} className="w-2 h-2 rounded-full" />
                     {inspectPacket.protocol}
                   </Chip>
-                  <span className="text-xs text-ink-3">{inspectPacket.length} bytes</span>
+                  <span className="text-xs text-ink-3 font-mono">{inspectPacket.length} bytes</span>
                 </div>
 
                 {inspectPacket.protocol === "TCP" && (
@@ -360,27 +311,26 @@ export function PacketInspector({
                     variant="outline"
                     size="sm"
                     onClick={() => setIsFollowStreamOpen(true)}
-                    className="text-[11px] h-7 px-2"
                   >
-                    <MessageSquare size={12} />
-                    <span>Follow Stream</span>
+                    <MessageSquare size={13} />
+                    <span>Follow TCP Stream</span>
                   </Button>
                 )}
               </div>
 
-              <div className="overflow-y-auto flex-1 space-y-3 pr-1 text-xs">
-                {/* Frame Header */}
-                <div className="p-3 rounded-[10px] bg-sunk/60 border border-rule space-y-1 font-mono">
-                  <span className="font-sans font-bold text-xs text-ink-2 block uppercase tracking-wider">
+              <div className="overflow-y-auto flex-1 space-y-4 pr-1 text-sm">
+                {/* Frame Metadata */}
+                <div className="p-4 rounded-xl bg-sunk/60 border border-rule space-y-1 font-mono">
+                  <span className="font-sans font-bold text-xs text-ink-2 block uppercase tracking-wider mb-1">
                     Frame Metadata
                   </span>
                   <div className="text-ink-2">Timestamp: {inspectPacket.timestamp_iso || inspectPacket.timestamp}</div>
                   <div className="text-ink-2">Wire Length: {inspectPacket.length} bytes ({formatBytes(inspectPacket.length)})</div>
                 </div>
 
-                {/* Layer 2: Ethernet II */}
-                <div className="p-3 rounded-[10px] bg-sunk/60 border border-rule space-y-1 font-mono">
-                  <span className="font-sans font-bold text-xs text-ink-2 block uppercase tracking-wider">
+                {/* Layer 2: Ethernet */}
+                <div className="p-4 rounded-xl bg-sunk/60 border border-rule space-y-1 font-mono">
+                  <span className="font-sans font-bold text-xs text-ink-2 block uppercase tracking-wider mb-1">
                     Ethernet II Layer
                   </span>
                   <div className="text-ink-2">Source MAC: {inspectPacket.source_mac || "00:00:00:00:00:00"}</div>
@@ -389,8 +339,8 @@ export function PacketInspector({
                 </div>
 
                 {/* Layer 3: Network */}
-                <div className="p-3 rounded-[10px] bg-sunk/60 border border-rule space-y-1 font-mono">
-                  <span className="font-sans font-bold text-xs text-ink-2 block uppercase tracking-wider">
+                <div className="p-4 rounded-xl bg-sunk/60 border border-rule space-y-1 font-mono">
+                  <span className="font-sans font-bold text-xs text-ink-2 block uppercase tracking-wider mb-1">
                     Network Layer ({inspectPacket.protocol === "ARP" ? "ARP" : `IPv${inspectPacket.ip_version || 4}`})
                   </span>
                   {inspectPacket.source_ip && <div className="text-ink-2">Source IP: {inspectPacket.source_ip}</div>}
@@ -406,8 +356,8 @@ export function PacketInspector({
 
                 {/* Layer 4: Transport */}
                 {(inspectPacket.source_port || inspectPacket.icmp_type !== undefined) && (
-                  <div className="p-3 rounded-[10px] bg-sunk/60 border border-rule space-y-1 font-mono">
-                    <span className="font-sans font-bold text-xs text-ink-2 block uppercase tracking-wider">
+                  <div className="p-4 rounded-xl bg-sunk/60 border border-rule space-y-1 font-mono">
+                    <span className="font-sans font-bold text-xs text-ink-2 block uppercase tracking-wider mb-1">
                       Transport Layer ({inspectPacket.protocol})
                     </span>
                     {inspectPacket.source_port && <div className="text-ink-2">Source Port: {inspectPacket.source_port}</div>}
@@ -423,14 +373,13 @@ export function PacketInspector({
                           .join(", ") || "NONE"}
                       </div>
                     )}
-                    {inspectPacket.icmp_description && <div className="text-ink-2">{inspectPacket.icmp_description}</div>}
                   </div>
                 )}
 
                 {/* Layer 7: Application */}
                 {(inspectPacket.dns_query || inspectPacket.dhcp_msg_type) && (
-                  <div className="p-3 rounded-[10px] bg-sunk/60 border border-rule space-y-1 font-mono">
-                    <span className="font-sans font-bold text-xs text-ink-2 block uppercase tracking-wider">
+                  <div className="p-4 rounded-xl bg-sunk/60 border border-rule space-y-1 font-mono">
+                    <span className="font-sans font-bold text-xs text-ink-2 block uppercase tracking-wider mb-1">
                       Application Payload
                     </span>
                     {inspectPacket.dns_query && (
@@ -440,27 +389,24 @@ export function PacketInspector({
                       </>
                     )}
                     {inspectPacket.dhcp_msg_type && (
-                      <>
-                        <div className="text-ink-2">DHCP Type: {inspectPacket.dhcp_msg_type}</div>
-                        {inspectPacket.dhcp_server_id && <div className="text-ink-2">Server ID: {inspectPacket.dhcp_server_id}</div>}
-                      </>
+                      <div className="text-ink-2">DHCP Type: {inspectPacket.dhcp_msg_type}</div>
                     )}
                   </div>
                 )}
 
                 {/* Safe Payload Hex Dump */}
-                <div className="p-3 rounded-[10px] bg-sunk/80 border border-rule space-y-1.5">
+                <div className="p-4 rounded-xl bg-sunk/80 border border-rule space-y-2">
                   <span className="font-sans font-bold text-xs text-ink-2 block uppercase tracking-wider">
                     Safe Payload Hex &amp; ASCII Viewer
                   </span>
-                  <pre className="p-2.5 rounded-[8px] bg-raised border border-rule font-mono text-[10px] text-ink overflow-x-auto whitespace-pre leading-relaxed select-text">
+                  <pre className="p-3 rounded-lg bg-raised border border-rule font-mono text-xs text-ink overflow-x-auto whitespace-pre leading-relaxed select-text">
                     {inspectPacket.payload_hex || "No raw payload bytes in this frame."}
                   </pre>
                 </div>
               </div>
             </div>
           ) : (
-            <div className="h-full flex items-center justify-center text-xs text-ink-3">
+            <div className="h-full flex items-center justify-center text-sm text-ink-3">
               Select a frame from the packet stream to inspect protocol layers.
             </div>
           )}
@@ -470,32 +416,32 @@ export function PacketInspector({
       {/* Follow TCP Stream Modal */}
       {isFollowStreamOpen && tcpStreamConversation && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-          <div className="bg-raised border border-rule rounded-card max-w-3xl w-full max-h-[85vh] flex flex-col shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+          <div className="bg-raised border border-rule rounded-2xl max-w-3xl w-full max-h-[85vh] flex flex-col shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-150">
             {/* Modal Header */}
-            <div className="flex items-center justify-between p-4 border-b border-rule bg-sunk/60">
-              <div className="flex items-center gap-2">
-                <MessageSquare size={16} className="text-brand" />
-                <h3 className="font-bold text-sm text-ink font-mono">
+            <div className="flex items-center justify-between p-5 border-b border-rule bg-sunk/60">
+              <div className="flex items-center gap-2.5">
+                <MessageSquare size={18} className="text-brand" />
+                <h3 className="font-bold text-base text-ink font-mono">
                   Follow TCP Stream: {tcpStreamConversation.endpointA} &lt;-&gt; {tcpStreamConversation.endpointB}
                 </h3>
               </div>
               <div className="flex items-center gap-2">
                 <Button variant="outline" size="sm" onClick={copyStreamText}>
-                  {copiedStream ? <Check size={13} /> : <Copy size={13} />}
-                  <span>Copy</span>
+                  {copiedStream ? <Check size={14} /> : <Copy size={14} />}
+                  <span>Copy Stream</span>
                 </Button>
                 <button
                   onClick={() => setIsFollowStreamOpen(false)}
                   className="p-1.5 rounded-full hover:bg-raised text-ink-2 hover:text-ink transition-colors"
                 >
-                  <X size={16} />
+                  <X size={18} />
                 </button>
               </div>
             </div>
 
             {/* Conversation Flow Reconstructed */}
-            <div className="p-4 overflow-y-auto flex-1 space-y-3 font-mono text-xs bg-canvas">
-              <div className="p-2 bg-sunk rounded text-[11px] text-ink-2">
+            <div className="p-6 overflow-y-auto flex-1 space-y-3 font-mono text-sm bg-canvas">
+              <div className="p-3 bg-sunk rounded-xl text-xs text-ink-2 mb-3">
                 Reconstructed bidirectional conversational stream ({tcpStreamConversation.packets.length} frames). Client requests highlighted in blue, server responses in green/amber.
               </div>
 
@@ -505,13 +451,13 @@ export function PacketInspector({
                   <div
                     key={p.frame_number}
                     className={cn(
-                      "p-3 rounded-[8px] border text-xs leading-relaxed",
+                      "p-3.5 rounded-xl border text-sm leading-relaxed",
                       isClient
                         ? "bg-blue-500/5 border-blue-500/20 text-blue-950 dark:text-blue-200"
                         : "bg-emerald-500/5 border-emerald-500/20 text-emerald-950 dark:text-emerald-200"
                     )}
                   >
-                    <div className="flex items-center justify-between text-[10px] font-bold opacity-75 mb-1">
+                    <div className="flex items-center justify-between text-xs font-bold opacity-75 mb-1.5">
                       <span>Frame #{p.frame_number} • {p.source_ip}:{p.source_port} &rarr; {p.destination_ip}:{p.destination_port}</span>
                       <span>{p.length} bytes</span>
                     </div>
@@ -524,7 +470,7 @@ export function PacketInspector({
             </div>
 
             {/* Modal Footer */}
-            <div className="p-3 border-t border-rule bg-sunk/60 flex items-center justify-between text-xs text-ink-2">
+            <div className="p-4 border-t border-rule bg-sunk/60 flex items-center justify-between text-xs text-ink-2">
               <span>Safely sanitized against code execution and malicious payloads.</span>
               <Button variant="secondary" size="sm" onClick={() => setIsFollowStreamOpen(false)}>
                 Close

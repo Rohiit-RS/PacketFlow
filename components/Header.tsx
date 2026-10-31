@@ -77,20 +77,20 @@ export function Header() {
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  "inline-flex items-center gap-1.5 px-3.5 h-8 rounded-full text-xs font-semibold transition-colors whitespace-nowrap",
+                  "inline-flex items-center gap-1.5 px-3.5 h-9 rounded-full text-sm font-medium transition-colors whitespace-nowrap",
                   isActive
-                    ? "bg-brand text-on-brand shadow-xs"
+                    ? "bg-brand text-on-brand shadow-xs font-semibold"
                     : "text-ink-2 hover:text-ink hover:bg-raised"
                 )}
               >
-                <Icon size={13} />
+                <Icon size={14} />
                 <span>{item.label}</span>
                 {item.badge !== null && (
                   <span
                     className={cn(
-                      "px-1.5 py-0.2 rounded-full text-[10px] font-mono",
+                      "px-1.5 py-0.2 rounded-full text-xs font-mono",
                       isActive
-                        ? "bg-brand-deep text-on-brand"
+                        ? "bg-brand-deep text-on-brand font-bold"
                         : "bg-raised text-ink-2 border border-rule-soft"
                     )}
                   >

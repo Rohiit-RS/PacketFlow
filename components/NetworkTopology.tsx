@@ -475,11 +475,11 @@ export function NetworkTopology({ packets, flows, findings }: NetworkTopologyPro
                     {/* Node IP Text */}
                     <text
                       x={node.x}
-                      y={node.y + 34}
+                      y={node.y + 36}
                       textAnchor="middle"
                       className={cn(
-                        "text-[11px] font-mono font-medium fill-current transition-colors",
-                        isSelected ? "fill-brand font-bold" : "fill-ink"
+                        "text-[13px] font-mono font-bold fill-current transition-colors",
+                        isSelected ? "fill-brand font-extrabold" : "fill-ink"
                       )}
                     >
                       {node.ip}
@@ -488,10 +488,10 @@ export function NetworkTopology({ packets, flows, findings }: NetworkTopologyPro
                     {/* Role Tag */}
                     <text
                       x={node.x}
-                      y={node.y + 46}
+                      y={node.y + 50}
                       textAnchor="middle"
                       className={cn(
-                        "text-[9px] font-sans uppercase font-bold tracking-wider",
+                        "text-[10px] font-sans uppercase font-extrabold tracking-wider",
                         isAttacker
                           ? "fill-red-600"
                           : isVictim

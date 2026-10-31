@@ -17,7 +17,7 @@ const VARIANT: Record<ButtonVariant, string> = {
 export function buttonClass(variant: ButtonVariant = "primary", size: "md" | "sm" | "lg" = "md") {
   return cn(
     "inline-flex items-center justify-center gap-2 rounded-[10px] font-semibold transition-[background-color,border-color,color,transform] duration-150 active:translate-y-px disabled:cursor-not-allowed disabled:active:translate-y-0 select-none cursor-pointer",
-    size === "sm" ? "min-h-9 px-3 text-sm" : size === "lg" ? "min-h-12 px-6 text-[1.05rem]" : "min-h-11 px-4 text-[0.97rem]",
+    size === "sm" ? "min-h-9 px-3.5 text-sm" : size === "lg" ? "min-h-12 px-6 text-lg" : "min-h-10 px-4 text-base",
     VARIANT[variant]
   );
 }
@@ -56,7 +56,7 @@ export function Chip({
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-semibold whitespace-nowrap",
+        "inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-sm font-medium whitespace-nowrap",
         TONE[tone],
         line === "pending" && "line-pending border-current",
         line === "ended" && "line-ended",
@@ -82,10 +82,10 @@ export function SectionTitle({
   className?: string;
 }) {
   return (
-    <div id={id} className={cn("flex flex-wrap items-end justify-between gap-3 mb-4 scroll-mt-24", className)}>
+    <div id={id} className={cn("flex flex-wrap items-end justify-between gap-3 mb-5 scroll-mt-24", className)}>
       <div>
-        <h2 className="text-lg font-bold tracking-[-0.02em] text-ink">{children}</h2>
-        {sub && <p className="text-sm text-ink-2 mt-0.5">{sub}</p>}
+        <h2 className="text-xl font-bold tracking-[-0.02em] text-ink">{children}</h2>
+        {sub && <p className="text-base text-ink-2 mt-1">{sub}</p>}
       </div>
       {action}
     </div>

@@ -138,57 +138,63 @@ export function RemediationGenerator({ findings, captureName }: RemediationGener
 
   return (
     <div className="space-y-6">
-      {/* Overview Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="bg-raised border border-rule rounded-card p-5">
-          <div className="flex items-center gap-2 text-ink-2 text-xs font-semibold uppercase tracking-wider">
-            <Terminal size={15} className="text-brand" />
-            <span>Linux iptables</span>
+      {/* Symmetric Overview Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-stretch">
+        <div className="bg-raised border border-rule rounded-2xl p-6 flex flex-col justify-between h-full shadow-xs">
+          <div>
+            <div className="flex items-center gap-2 text-ink-3 text-xs font-bold uppercase tracking-wider">
+              <Terminal size={16} className="text-brand" />
+              <span>Linux iptables</span>
+            </div>
+            <div className="text-xl font-bold font-mono text-ink mt-2">
+              Automated .sh Script
+            </div>
+            <p className="text-sm text-ink-2 mt-1.5 leading-relaxed">
+              Immediate shell drops and rate-limiting rules generated for all malicious hosts.
+            </p>
           </div>
-          <div className="text-xl font-bold font-mono text-ink mt-2">
-            Automated .sh Script
-          </div>
-          <p className="text-xs text-ink-2 mt-1">
-            Immediate shell drops and rate-limiting rules generated for all malicious hosts.
-          </p>
         </div>
 
-        <div className="bg-raised border border-rule rounded-card p-5">
-          <div className="flex items-center gap-2 text-ink-2 text-xs font-semibold uppercase tracking-wider">
-            <ShieldCheck size={15} className="text-green-600" />
-            <span>IDS Signatures</span>
+        <div className="bg-raised border border-rule rounded-2xl p-6 flex flex-col justify-between h-full shadow-xs">
+          <div>
+            <div className="flex items-center gap-2 text-ink-3 text-xs font-bold uppercase tracking-wider">
+              <ShieldCheck size={16} className="text-ok" />
+              <span>IDS Signatures</span>
+            </div>
+            <div className="text-xl font-bold font-mono text-ink mt-2">
+              Snort &amp; Suricata
+            </div>
+            <p className="text-sm text-ink-2 mt-1.5 leading-relaxed">
+              Compliant rule signatures with unique SIDs for zero-day attack monitoring.
+            </p>
           </div>
-          <div className="text-xl font-bold font-mono text-ink mt-2">
-            Snort & Suricata
-          </div>
-          <p className="text-xs text-ink-2 mt-1">
-            Compliant rule signatures with unique SIDs for zero-day attack monitoring.
-          </p>
         </div>
 
-        <div className="bg-raised border border-rule rounded-card p-5">
-          <div className="flex items-center gap-2 text-ink-2 text-xs font-semibold uppercase tracking-wider">
-            <Server size={15} className="text-blue-600" />
-            <span>Switch Infrastructure</span>
+        <div className="bg-raised border border-rule rounded-2xl p-6 flex flex-col justify-between h-full shadow-xs">
+          <div>
+            <div className="flex items-center gap-2 text-ink-3 text-xs font-bold uppercase tracking-wider">
+              <Server size={16} className="text-blue-600" />
+              <span>Switch Infrastructure</span>
+            </div>
+            <div className="text-xl font-bold font-mono text-ink mt-2">
+              Cisco IOS Hardening
+            </div>
+            <p className="text-sm text-ink-2 mt-1.5 leading-relaxed">
+              Hardware-level Dynamic ARP Inspection, DHCP snooping, and MSS clamping.
+            </p>
           </div>
-          <div className="text-xl font-bold font-mono text-ink mt-2">
-            Cisco IOS Hardening
-          </div>
-          <p className="text-xs text-ink-2 mt-1">
-            Hardware-level Dynamic ARP Inspection, DHCP snooping, and MSS clamping.
-          </p>
         </div>
       </div>
 
       {/* Main Tabbed Terminal Viewer */}
-      <div className="bg-raised border border-rule rounded-card overflow-hidden shadow-sm">
+      <div className="bg-raised border border-rule rounded-2xl overflow-hidden shadow-xs">
         {/* Navigation Tabs Header */}
-        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-rule bg-sunk/60 px-4 py-3">
-          <div className="flex items-center gap-1.5">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-rule bg-sunk/60 px-5 py-3.5">
+          <div className="flex items-center gap-2">
             {[
-              { id: "IPTABLES", label: "Linux iptables (remediation.sh)", icon: Terminal },
-              { id: "SNORT", label: "Snort / Suricata Rules", icon: ShieldCheck },
-              { id: "CISCO", label: "Cisco Switch Config", icon: Server },
+              { id: "IPTABLES", label: "Linux iptables", icon: Terminal },
+              { id: "SNORT", label: "Snort / Suricata", icon: ShieldCheck },
+              { id: "CISCO", label: "Cisco IOS Switch", icon: Server },
               { id: "CHECKLIST", label: "Action Checklist", icon: Wrench },
             ].map(tab => {
               const Icon = tab.icon;
@@ -197,13 +203,13 @@ export function RemediationGenerator({ findings, captureName }: RemediationGener
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id as any)}
                   className={cn(
-                    "flex items-center gap-2 px-3 py-1.5 rounded-[10px] text-xs font-semibold transition-colors",
+                    "flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-colors",
                     activeTab === tab.id
                       ? "bg-raised text-ink border border-rule shadow-xs"
                       : "text-ink-2 hover:text-ink hover:bg-raised-hover"
                   )}
                 >
-                  <Icon size={14} />
+                  <Icon size={15} />
                   <span>{tab.label}</span>
                 </button>
               );
@@ -278,14 +284,14 @@ export function RemediationGenerator({ findings, captureName }: RemediationGener
         </div>
 
         {/* Tab Contents */}
-        <div className="p-6">
+        <div className="p-6 sm:p-8">
           {activeTab === "IPTABLES" && (
             <div className="space-y-4">
-              <div className="flex items-center justify-between text-xs text-ink-2">
-                <span>Executable bash script formatted for Ubuntu / Debian / RHEL systems:</span>
-                <span className="font-mono text-[11px] bg-sunk px-2 py-0.5 rounded border border-rule-soft">chmod +x remediation.sh && sudo ./remediation.sh</span>
+              <div className="flex items-center justify-between text-sm text-ink-2">
+                <span>Executable bash script formatted for Linux iptables:</span>
+                <span className="font-mono text-xs bg-sunk px-2.5 py-1 rounded-md border border-rule-soft">chmod +x remediation.sh &amp;&amp; sudo ./remediation.sh</span>
               </div>
-              <pre className="p-4 bg-canvas rounded-[10px] border border-rule font-mono text-xs text-ink leading-relaxed overflow-x-auto max-h-[460px]">
+              <pre className="p-6 bg-canvas rounded-xl border border-rule font-mono text-sm text-ink leading-relaxed overflow-x-auto max-h-[500px]">
                 {iptablesScript}
               </pre>
             </div>
@@ -293,11 +299,11 @@ export function RemediationGenerator({ findings, captureName }: RemediationGener
 
           {activeTab === "SNORT" && (
             <div className="space-y-4">
-              <div className="flex items-center justify-between text-xs text-ink-2">
-                <span>IDS signatures for `/etc/snort/rules/local.rules` or `/etc/suricata/rules`:</span>
-                <span className="font-mono text-[11px] bg-sunk px-2 py-0.5 rounded border border-rule-soft">snort -T -c /etc/snort/snort.conf</span>
+              <div className="flex items-center justify-between text-sm text-ink-2">
+                <span>IDS signatures for Snort and Suricata rulesets:</span>
+                <span className="font-mono text-xs bg-sunk px-2.5 py-1 rounded-md border border-rule-soft">snort -T -c /etc/snort/snort.conf</span>
               </div>
-              <pre className="p-4 bg-canvas rounded-[10px] border border-rule font-mono text-xs text-ink leading-relaxed overflow-x-auto max-h-[460px]">
+              <pre className="p-6 bg-canvas rounded-xl border border-rule font-mono text-sm text-ink leading-relaxed overflow-x-auto max-h-[500px]">
                 {snortRules}
               </pre>
             </div>
@@ -305,55 +311,55 @@ export function RemediationGenerator({ findings, captureName }: RemediationGener
 
           {activeTab === "CISCO" && (
             <div className="space-y-4">
-              <div className="flex items-center justify-between text-xs text-ink-2">
-                <span>CLI commands for Cisco Catalyst / Enterprise managed layer 2/3 switches:</span>
-                <span className="font-mono text-[11px] bg-sunk px-2 py-0.5 rounded border border-rule-soft">Switch# copy running-config startup-config</span>
+              <div className="flex items-center justify-between text-sm text-ink-2">
+                <span>Configuration commands for Cisco enterprise switches:</span>
+                <span className="font-mono text-xs bg-sunk px-2.5 py-1 rounded-md border border-rule-soft">Switch# copy running-config startup-config</span>
               </div>
-              <pre className="p-4 bg-canvas rounded-[10px] border border-rule font-mono text-xs text-ink leading-relaxed overflow-x-auto max-h-[460px]">
+              <pre className="p-6 bg-canvas rounded-xl border border-rule font-mono text-sm text-ink leading-relaxed overflow-x-auto max-h-[500px]">
                 {ciscoScript}
               </pre>
             </div>
           )}
 
           {activeTab === "CHECKLIST" && (
-            <div className="space-y-4">
-              <div className="text-xs text-ink-2">
+            <div className="space-y-5">
+              <div className="text-sm font-medium text-ink-2">
                 Interactive incident response checklist tailored to the {findings.length} detected findings:
               </div>
 
-              <div className="space-y-3">
+              <div className="space-y-4">
                 {findings.map(f => (
                   <div
                     key={f.id}
-                    className="p-4 bg-canvas border border-rule rounded-[10px] space-y-3"
+                    className="p-6 bg-canvas border border-rule rounded-xl space-y-4"
                   >
                     <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs font-mono font-bold text-ink">{f.id}</span>
-                        <h4 className="text-sm font-semibold text-ink">{f.issue_title}</h4>
+                      <div className="flex items-center gap-3">
+                        <span className="text-sm font-mono font-bold text-ink">{f.id}</span>
+                        <h4 className="text-base font-bold text-ink">{f.issue_title}</h4>
                       </div>
                       <Chip tone={f.severity === "CRITICAL" ? "flag" : f.severity === "HIGH" ? "warn" : "muted"}>
                         {f.severity}
                       </Chip>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
-                      <div className="p-3 bg-red-500/5 border border-red-500/20 rounded-[8px]">
-                        <div className="font-bold text-red-600 flex items-center gap-1.5 uppercase text-[10px]">
-                          <AlertCircle size={12} />
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-stretch text-sm">
+                      <div className="p-4 bg-red-500/5 border border-red-500/20 rounded-xl flex flex-col justify-start h-full">
+                        <div className="font-bold text-red-600 flex items-center gap-1.5 uppercase text-xs mb-1">
+                          <AlertCircle size={14} />
                           Immediate Containment Step
                         </div>
-                        <p className="text-ink mt-1 text-[11px] leading-relaxed">
+                        <p className="text-ink text-sm leading-relaxed font-normal">
                           {f.recommended_remediation.immediate_action}
                         </p>
                       </div>
 
-                      <div className="p-3 bg-blue-500/5 border border-blue-500/20 rounded-[8px]">
-                        <div className="font-bold text-blue-600 flex items-center gap-1.5 uppercase text-[10px]">
-                          <ShieldCheck size={12} />
+                      <div className="p-4 bg-blue-500/5 border border-blue-500/20 rounded-xl flex flex-col justify-start h-full">
+                        <div className="font-bold text-blue-600 flex items-center gap-1.5 uppercase text-xs mb-1">
+                          <ShieldCheck size={14} />
                           Long-Term Architectural Fix
                         </div>
-                        <p className="text-ink mt-1 text-[11px] leading-relaxed">
+                        <p className="text-ink text-sm leading-relaxed font-normal">
                           {f.recommended_remediation.long_term_fix}
                         </p>
                       </div>

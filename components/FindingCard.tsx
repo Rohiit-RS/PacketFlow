@@ -44,17 +44,17 @@ export function FindingCard({ finding, onSelectEvidence }: FindingCardProps) {
   return (
     <Panel
       className={cn(
-        "p-5 transition-all border",
-        isAttack && isCritical ? "border-flag-line hover:border-flag" : "border-rule hover:border-rule-strong"
+        "p-6 sm:p-8 transition-all border shadow-xs",
+        isAttack && isCritical ? "border-l-[6px] border-l-flag border-rule" : "border-rule hover:border-brand/40"
       )}
     >
       {/* Top Header Line */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pb-3 border-b border-rule-soft">
-        <div className="flex flex-wrap items-center gap-2">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-4 border-b border-rule">
+        <div className="flex flex-wrap items-center gap-2.5">
           {/* Finding ID */}
           <Link
             href={`/findings/${finding.id}`}
-            className="font-mono text-xs font-semibold px-2 py-0.5 rounded-[6px] bg-sunk text-ink-2 border border-rule hover:text-brand hover:border-brand transition-colors"
+            className="font-mono text-sm font-bold px-3 py-1 rounded-lg bg-sunk text-ink border border-rule hover:text-brand hover:border-brand transition-colors"
           >
             {finding.id}
           </Link>
@@ -63,8 +63,9 @@ export function FindingCard({ finding, onSelectEvidence }: FindingCardProps) {
           <Chip tone={isAttack ? "flag" : "warn"}>
             <Swatch
               color={isAttack ? "var(--color-flag)" : "var(--color-warn)"}
+              className="w-2.5 h-2.5 rounded-full"
             />
-            {isAttack ? "Cyber Attack" : "Operational Fault"}
+            {isAttack ? "Malicious Attack" : "Operational Fault"}
           </Chip>
 
           {/* Severity Chip */}
@@ -73,7 +74,7 @@ export function FindingCard({ finding, onSelectEvidence }: FindingCardProps) {
           </Chip>
 
           {/* Confidence Score */}
-          <div className="inline-flex items-center gap-1.5 rounded-full border border-rule bg-sunk px-2.5 py-0.5 text-xs text-ink-2 font-mono">
+          <div className="inline-flex items-center gap-1.5 rounded-full border border-rule bg-sunk px-3 py-1 text-xs text-ink-2 font-mono font-medium">
             <span>Confidence:</span>
             <span
               className={cn(
@@ -90,19 +91,19 @@ export function FindingCard({ finding, onSelectEvidence }: FindingCardProps) {
           </div>
 
           {finding.mitre_technique && (
-            <span className="px-2 py-0.5 rounded text-[10px] font-mono bg-red-500/10 text-red-600 border border-red-500/20 font-bold">
+            <span className="px-2.5 py-1 rounded-full text-xs font-mono bg-red-500/10 text-red-600 border border-red-500/20 font-bold">
               MITRE {finding.mitre_technique.id}
             </span>
           )}
         </div>
 
-        <div className="flex items-center gap-3 self-end sm:self-auto">
+        <div className="flex items-center gap-4 self-end sm:self-auto">
           <Link
             href={`/findings/${finding.id}`}
-            className="text-xs font-semibold text-brand hover:underline inline-flex items-center gap-1"
+            className="text-sm font-semibold text-brand hover:underline inline-flex items-center gap-1.5"
           >
-            <span>Dossier Page</span>
-            <ArrowRight size={12} />
+            <span>Dossier View</span>
+            <ArrowRight size={14} />
           </Link>
 
           <button
@@ -111,28 +112,28 @@ export function FindingCard({ finding, onSelectEvidence }: FindingCardProps) {
             className="text-xs text-ink-3 hover:text-ink font-semibold inline-flex items-center gap-1 cursor-pointer"
           >
             <span>{expanded ? "Collapse" : "Expand"}</span>
-            {expanded ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
+            {expanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
           </button>
         </div>
       </div>
 
       {/* Main Body */}
-      <div className="pt-3.5 space-y-3.5">
+      <div className="pt-4 space-y-4">
         <Link href={`/findings/${finding.id}`} className="block group">
-          <h3 className="text-[1.125rem] font-bold text-ink group-hover:text-brand transition-colors tracking-tight">
+          <h3 className="text-xl sm:text-2xl font-bold text-ink group-hover:text-brand transition-colors tracking-tight">
             {finding.issue_title}
           </h3>
         </Link>
 
         {/* Beginner-friendly plain-language explanation */}
-        <div className="p-3.5 rounded-[12px] bg-sunk/60 border border-rule-soft">
-          <div className="flex items-start gap-2.5">
-            <Info size={16} className="text-brand shrink-0 mt-0.5" />
+        <div className="p-5 rounded-xl bg-sunk/60 border border-rule-soft">
+          <div className="flex items-start gap-3">
+            <Info size={18} className="text-brand shrink-0 mt-0.5" />
             <div>
-              <span className="text-xs font-bold text-ink uppercase tracking-wide block mb-1">
-                Plain-Language Explanation (Non-Expert Summary)
+              <span className="text-xs font-bold text-ink uppercase tracking-wider block mb-1">
+                Plain-Language Explanation (Non-Expert Guide)
               </span>
-              <p className="text-[0.9375rem] text-ink-2 leading-[1.55]">
+              <p className="text-base text-ink-2 leading-relaxed font-normal">
                 {finding.plain_language_explanation}
               </p>
             </div>
@@ -140,23 +141,23 @@ export function FindingCard({ finding, onSelectEvidence }: FindingCardProps) {
         </div>
 
         {expanded && (
-          <div className="space-y-4 animate-in fade-in pt-1">
+          <div className="space-y-5 animate-in fade-in pt-1">
             {/* Technical Root Cause */}
             <div>
-              <span className="text-xs font-semibold text-ink-3 uppercase tracking-wider block mb-1">
+              <span className="text-xs font-bold text-ink-3 uppercase tracking-wider block mb-1.5">
                 Technical Root Cause &amp; Telemetry Breakdown
               </span>
-              <p className="text-[0.9375rem] text-ink-2 leading-[1.55] p-3 rounded-[10px] bg-raised border border-rule">
+              <p className="text-sm text-ink-2 leading-relaxed p-4 rounded-xl bg-raised border border-rule font-sans">
                 {finding.technical_details.root_cause}
               </p>
             </div>
 
             {/* Cited Evidence Packets */}
             <div>
-              <span className="text-xs font-semibold text-ink-3 uppercase tracking-wider block mb-1.5">
+              <span className="text-xs font-bold text-ink-3 uppercase tracking-wider block mb-2">
                 Cited Evidence Packets ({finding.technical_details.evidence_packets.length})
               </span>
-              <div className="space-y-1.5">
+              <div className="space-y-2">
                 {finding.technical_details.evidence_packets.map((ev, idx) => {
                   const frameMatch = ev.match(/Frame #(\d+)/);
                   const frameNum = frameMatch ? frameMatch[1] : null;
@@ -164,51 +165,53 @@ export function FindingCard({ finding, onSelectEvidence }: FindingCardProps) {
                   return (
                     <div
                       key={idx}
-                      className="p-2.5 rounded-[10px] bg-sunk/50 border border-rule font-mono text-xs text-ink flex items-center justify-between hover:border-rule-strong hover:bg-sunk transition-colors"
+                      className="p-3 rounded-lg bg-sunk/50 border border-rule font-mono text-xs text-ink flex items-center justify-between hover:border-rule-strong hover:bg-sunk transition-colors"
                     >
-                      <div className="flex items-center gap-2 truncate">
-                        <Swatch color="var(--color-brand)" />
+                      <div className="flex items-center gap-2.5 truncate">
+                        <Swatch color="var(--color-brand)" className="w-2 h-2 rounded-full" />
                         <span className="truncate">{ev}</span>
                       </div>
                       {frameNum ? (
                         <Link
                           href={`/packets?frame=${frameNum}`}
-                          className="text-[11px] text-brand font-semibold shrink-0 ml-2 hover:underline inline-flex items-center gap-1"
+                          className="text-xs text-brand font-semibold shrink-0 ml-2 hover:underline inline-flex items-center gap-1"
                         >
                           <span>Frame #{frameNum}</span>
-                          <ArrowRight size={11} />
+                          <ArrowRight size={12} />
                         </Link>
-                      ) : null}
+                      ) : (
+                        <span className="text-xs text-ink-3 font-sans">Log Trace</span>
+                      )}
                     </div>
                   );
                 })}
               </div>
             </div>
 
-            {/* Dual Action Remediation */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1">
-              {/* Immediate Action */}
-              <div className="p-3.5 rounded-[12px] border border-flag-line/40 bg-flag-soft/20">
-                <div className="flex items-center gap-2 mb-1.5">
-                  <Zap size={14} className="text-flag" />
+            {/* Symmetric Dual Action Remediation Boxes */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-stretch pt-2">
+              {/* Immediate Action (Equal Height) */}
+              <div className="p-5 rounded-xl border border-flag-line/40 bg-flag-soft/20 flex flex-col justify-start h-full">
+                <div className="flex items-center gap-2 mb-2">
+                  <Zap size={16} className="text-flag" />
                   <span className="text-xs font-bold text-flag uppercase tracking-wide">
                     Immediate Action (Contain Outage / Attack)
                   </span>
                 </div>
-                <p className="text-xs sm:text-[0.875rem] text-ink leading-relaxed">
+                <p className="text-sm text-ink leading-relaxed font-medium">
                   {finding.recommended_remediation.immediate_action}
                 </p>
               </div>
 
-              {/* Long-Term Fix */}
-              <div className="p-3.5 rounded-[12px] border border-ok-line/40 bg-ok-soft/20">
-                <div className="flex items-center gap-2 mb-1.5">
-                  <ShieldCheck size={14} className="text-ok" />
+              {/* Long-Term Fix (Equal Height) */}
+              <div className="p-5 rounded-xl border border-ok-line/40 bg-ok-soft/20 flex flex-col justify-start h-full">
+                <div className="flex items-center gap-2 mb-2">
+                  <ShieldCheck size={16} className="text-ok" />
                   <span className="text-xs font-bold text-ok uppercase tracking-wide">
                     Long-Term Fix (Prevent Recurrence)
                   </span>
                 </div>
-                <p className="text-xs sm:text-[0.875rem] text-ink leading-relaxed">
+                <p className="text-sm text-ink leading-relaxed font-medium">
                   {finding.recommended_remediation.long_term_fix}
                 </p>
               </div>

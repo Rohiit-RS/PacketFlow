@@ -4,9 +4,8 @@ import {
   Layers,
   Wrench,
   ShieldAlert,
-  Clock,
-  ArrowDownUp,
-  Percent,
+  Activity,
+  CheckCircle2,
 } from "lucide-react";
 import { Panel, Swatch, cn } from "./ui";
 import { formatBytes } from "@/lib/utils/formatters";
@@ -27,66 +26,56 @@ interface MetricsGridProps {
 export function MetricsGrid({ stats, flowsCount }: MetricsGridProps) {
   const cards = [
     {
-      label: "Packets Analyzed",
-      value: stats.total_packets.toLocaleString(),
-      sub: formatBytes(stats.total_bytes),
+      label: "Analyzed Telemetry",
+      value: `${stats.total_packets.toLocaleString()} frames`,
+      sub: `${formatBytes(stats.total_bytes)} • ${flowsCount} active flows`,
       swatchColor: "var(--color-brand)",
       icon: Layers,
     },
     {
-      label: "Active Flows",
-      value: String(flowsCount),
-      sub: "Bidirectional streams",
-      swatchColor: "var(--color-c-tcp)",
-      icon: ArrowDownUp,
-    },
-    {
-      label: "Operational Faults",
-      value: String(stats.fault_count),
-      sub: stats.fault_count > 0 ? "TCP / DNS / MTU outages" : "Zero outages",
+      label: "Operational Outages",
+      value: `${stats.fault_count} ${stats.fault_count === 1 ? "Fault" : "Faults"}`,
+      sub: stats.fault_count > 0 ? "TCP / DNS / MTU degradation" : "Zero infrastructure faults",
       swatchColor: stats.fault_count > 0 ? "var(--color-warn)" : "var(--color-ok)",
       icon: Wrench,
     },
     {
-      label: "Security Incidents",
-      value: String(stats.attack_count),
-      sub: stats.attack_count > 0 ? `${stats.critical_count} critical threat(s)` : "Zero threats",
+      label: "Cyber Threat Events",
+      value: `${stats.attack_count} ${stats.attack_count === 1 ? "Attack" : "Attacks"}`,
+      sub: stats.attack_count > 0 ? `${stats.critical_count} critical threat(s)` : "Zero malicious activities",
       swatchColor: stats.attack_count > 0 ? "var(--color-flag)" : "var(--color-ok)",
       icon: ShieldAlert,
     },
     {
-      label: "Avg RTT Latency",
-      value: `${stats.average_rtt_ms} ms`,
-      sub: stats.average_rtt_ms > 200 ? "High round-trip delay" : "Nominal delay",
-      swatchColor: stats.average_rtt_ms > 200 ? "var(--color-warn)" : "var(--color-c-tcp)",
-      icon: Clock,
-    },
-    {
-      label: "Packet Loss Rate",
-      value: `${stats.packet_loss_percentage}%`,
-      sub: stats.packet_loss_percentage > 5 ? "Elevated drop rate" : "Zero packet loss",
-      swatchColor: stats.packet_loss_percentage > 5 ? "var(--color-flag)" : "var(--color-ok)",
-      icon: Percent,
+      label: "Latency & Loss Rate",
+      value: `${stats.packet_loss_percentage}% Loss`,
+      sub: `Average RTT: ${stats.average_rtt_ms} ms`,
+      swatchColor: stats.packet_loss_percentage > 3 ? "var(--color-flag)" : "var(--color-ok)",
+      icon: Activity,
     },
   ];
 
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 items-stretch">
       {cards.map((card, idx) => {
         const Icon = card.icon;
         return (
-          <Panel key={idx} className="p-3.5 flex flex-col justify-between hover:border-rule-strong transition-colors">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-xs font-semibold text-ink-3">
+          <Panel
+            key={idx}
+            className="p-6 flex flex-col justify-between h-full border border-rule hover:border-brand/40 transition-colors shadow-xs"
+          >
+            <div className="flex items-center justify-between mb-4">
+              <span className="text-sm uppercase tracking-wider font-bold text-ink-3">
                 {card.label}
               </span>
-              <Swatch color={card.swatchColor} />
+              <Swatch color={card.swatchColor} className="w-3.5 h-3.5 rounded" />
             </div>
+
             <div>
-              <p className="text-xl font-bold tracking-tight text-ink font-sans">
+              <p className="text-3xl font-extrabold tracking-tight text-ink font-sans">
                 {card.value}
               </p>
-              <p className="text-xs text-ink-2 mt-0.5 truncate">
+              <p className="text-sm font-medium text-ink-2 mt-2">
                 {card.sub}
               </p>
             </div>

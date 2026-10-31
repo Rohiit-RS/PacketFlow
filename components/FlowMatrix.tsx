@@ -45,8 +45,8 @@ export function FlowMatrix({ flows }: FlowMatrixProps) {
         Active Conversations &amp; Flow Matrix ({flows.length})
       </SectionTitle>
 
-      <Panel className="overflow-hidden">
-        <div className="overflow-x-auto font-mono text-xs max-h-[480px] overflow-y-auto">
+      <Panel className="overflow-hidden border border-rule shadow-xs">
+        <div className="overflow-x-auto font-mono text-sm max-h-[520px] overflow-y-auto">
           <table className="chart">
             <thead>
               <tr>

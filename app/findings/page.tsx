@@ -54,45 +54,45 @@ export default function FindingsPage() {
   return (
     <main className="mx-auto w-full max-w-[1360px] px-4 sm:px-8 py-6 sm:py-8 space-y-6">
       {/* Top Breadcrumb & Title */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-rule">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-rule">
         <div>
-          <div className="flex items-center gap-2 text-xs text-ink-3 mb-1">
-            <Link href="/" className="hover:text-brand hover:underline inline-flex items-center gap-1">
-              <ArrowLeft size={12} />
-              <span>Overview</span>
+          <div className="flex items-center gap-2.5 text-sm text-ink-3 mb-1">
+            <Link href="/" className="hover:text-brand hover:underline inline-flex items-center gap-1 font-medium">
+              <ArrowLeft size={14} />
+              <span>Dashboard</span>
             </Link>
             <span>/</span>
             <span className="text-ink font-semibold">Diagnostic Findings</span>
           </div>
-          <h1 className="text-2xl font-bold tracking-tight text-ink">
+          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-ink">
             Diagnostic Findings &amp; Incident Triage
           </h1>
-          <p className="text-xs sm:text-sm text-ink-2 mt-0.5">
+          <p className="text-sm sm:text-base text-ink-2 mt-1">
             Classified security attacks and operational outages with technical root causes, cited evidence, and remediation plans.
           </p>
         </div>
 
         {/* Search Field */}
         <div className="relative">
-          <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-3" />
+          <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-ink-3" />
           <input
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search findings by keyword or ID..."
-            className="pl-8 pr-3 py-1.5 bg-sunk rounded-[10px] text-xs text-ink border border-rule focus:outline-none focus:border-brand w-full sm:w-64 field"
+            className="pl-10 pr-4 py-2 bg-sunk rounded-xl text-sm text-ink border border-rule focus:outline-none focus:border-brand w-full sm:w-72"
           />
         </div>
       </div>
 
       {/* Filter Tabs (Pill style) */}
       <div className="flex items-center justify-between gap-4 overflow-x-auto pb-1">
-        <div className="flex items-center gap-1.5 p-1 bg-sunk rounded-full border border-rule text-xs">
+        <div className="flex items-center gap-2 p-1.5 bg-sunk rounded-full border border-rule text-sm">
           <button
             type="button"
             onClick={() => setFilter("ALL")}
             className={cn(
-              "px-3.5 py-1 rounded-full font-semibold transition-colors cursor-pointer text-xs",
+              "px-4 py-1.5 rounded-full font-semibold transition-colors cursor-pointer text-sm",
               filter === "ALL" ? "bg-raised text-ink shadow-xs" : "text-ink-2 hover:text-ink"
             )}
           >

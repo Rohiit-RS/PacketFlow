@@ -1,0 +1,295 @@
+@import "tailwindcss";
+
+/* PacketFlow: Swiss clinical network diagnostic world (Geigy school).
+   A cool white grid, one cobalt action colour, a reserved signal for Critical Attacks,
+   and vivid code colours per protocol and finding class, used as swatches and bars, never as text. */
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+@theme {
+  --color-canvas: #f4f6fa;
+  --color-raised: #ffffff;
+  --color-sunk: #eef1f6;
+  --color-ink: #0c1222;
+  --color-ink-2: #465066;
+  --color-ink-3: #5f697d;
+  --color-rule: #dce1ea;
+  --color-rule-soft: #ebeef4;
+  --color-rule-strong: #b7c0d0;
+
+  --color-brand: #1f4fff;
+  --color-brand-deep: #1238d6;
+  --color-brand-soft: #e9eeff;
+  --color-brand-line: #c3cfff;
+  --color-on-brand: #ffffff;
+
+  --color-flag: #d0174f;
+  --color-flag-deep: #a80f3e;
+  --color-flag-soft: #fdebf0;
+  --color-flag-line: #f5bccd;
+
+  --color-pend: #f5a524;
+  --color-pend-soft: #fff4de;
+  --color-pend-ink: #6f4300;
+
+  --color-ok: #0a7f46;
+  --color-ok-soft: #e3f6ec;
+  --color-ok-line: #a8dcc0;
+
+  --color-warn: #a34b00;
+  --color-warn-soft: #fff3e3;
+  --color-warn-line: #f2c48d;
+
+  /* Protocol & Telemetry class codes */
+  --color-c-exploit: #ff4f2e;  /* Vermilion: Active exploits & injection */
+  --color-c-tcp: #00a5cf;      /* Cyan: TCP transport streams */
+  --color-c-routing: #7b3ff2;  /* Violet: ARP, ICMP, routing */
+  --color-c-healthy: #13a454;  /* Green: Verified nominal traffic */
+  --color-c-latency: #f59e0b;  /* Amber: High latency, retransmission */
+  --color-c-dns: #e8318c;      /* Pink: DNS lookups & exfil */
+  --color-c-other: #7d889b;    /* Slate: Unclassed packets */
+
+  --font-sans: var(--font-grotesk), "Hanken Grotesk", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+
+  --text-xs: 0.8125rem;
+  --text-sm: 0.9375rem;
+  --text-base: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.3125rem;
+  --text-2xl: 1.625rem;
+  --text-3xl: 2rem;
+  --text-4xl: 2.75rem;
+
+  --shadow-pop: 0 1px 2px rgb(12 18 34 / 0.06), 0 12px 32px -12px rgb(12 18 34 / 0.22);
+  --shadow-lift: 0 1px 2px rgb(12 18 34 / 0.05), 0 6px 18px -10px rgb(12 18 34 / 0.18);
+
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Dark theme: the same clinical world at night */
+:root[data-theme="dark"] {
+  --color-canvas: #0a0e17;
+  --color-raised: #111725;
+  --color-sunk: #0d1320;
+  --color-ink: #e9edf5;
+  --color-ink-2: #aab3c5;
+  --color-ink-3: #8b95a9;
+  --color-rule: #252e40;
+  --color-rule-soft: #1a2232;
+  --color-rule-strong: #3a4558;
+
+  --color-brand: #7b96ff;
+  --color-brand-deep: #9cb0ff;
+  --color-brand-soft: #18214a;
+  --color-brand-line: #2f3d7a;
+  --color-on-brand: #070b16;
+
+  --color-flag: #ff5c8d;
+  --color-flag-deep: #ff86a9;
+  --color-flag-soft: #2c0f1b;
+  --color-flag-line: #5a1d33;
+
+  --color-pend: #f7b84a;
+  --color-pend-soft: #2c210b;
+  --color-pend-ink: #f9cf80;
+
+  --color-ok: #3fd68a;
+  --color-ok-soft: #0d2a1c;
+  --color-ok-line: #1d5a3b;
+
+  --color-warn: #ffb35c;
+  --color-warn-soft: #2d1d08;
+  --color-warn-line: #5e3d12;
+
+  --color-c-exploit: #ff6a4d;
+  --color-c-tcp: #22c3ec;
+  --color-c-routing: #9a6bff;
+  --color-c-healthy: #2fcf75;
+  --color-c-latency: #fbb431;
+  --color-c-dns: #ff5aa8;
+  --color-c-other: #8f9ab0;
+
+  --shadow-pop: 0 1px 2px rgb(0 0 0 / 0.4), 0 14px 36px -12px rgb(0 0 0 / 0.7);
+  --shadow-lift: 0 1px 2px rgb(0 0 0 / 0.35), 0 8px 22px -10px rgb(0 0 0 / 0.6);
+}
+
+@layer base {
+  html {
+    color-scheme: light;
+    -webkit-text-size-adjust: 100%;
+  }
+  html[data-theme="dark"] {
+    color-scheme: dark;
+  }
+  body {
+    background: var(--color-canvas);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    font-size: 1rem;
+    line-height: 1.55;
+    font-variant-numeric: tabular-nums;
+    transition: background-color 0.25s var(--ease-out-expo), color 0.25s var(--ease-out-expo);
+  }
+  h1, h2, h3, h4 {
+    text-wrap: balance;
+    line-height: 1.18;
+    letter-spacing: -0.022em;
+  }
+  h1 { font-weight: 700; }
+  p { text-wrap: pretty; }
+  ::selection {
+    background: var(--color-brand);
+    color: var(--color-on-brand);
+  }
+  :focus-visible {
+    outline: 2.5px solid var(--color-brand);
+    outline-offset: 2px;
+    border-radius: 6px;
+  }
+  a {
+    text-underline-offset: 3px;
+    text-decoration-thickness: 1px;
+  }
+  input, select, textarea {
+    caret-color: var(--color-brand);
+    accent-color: var(--color-brand);
+  }
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-rule-strong) transparent;
+  }
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--color-rule-strong);
+    border-radius: 8px;
+    border: 2px solid var(--color-canvas);
+  }
+}
+
+@layer components {
+  /* Swiss data table: quiet header, hairline rows, tabular figures */
+  .chart {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: var(--text-sm);
+  }
+  .chart th {
+    text-align: left;
+    font-weight: 600;
+    font-size: var(--text-xs);
+    color: var(--color-ink-3);
+    padding: 0.65rem 0.9rem;
+    border-bottom: 1px solid var(--color-rule);
+    white-space: nowrap;
+    background: var(--color-sunk);
+  }
+  .chart td {
+    padding: 0.75rem 0.9rem;
+    border-bottom: 1px solid var(--color-rule-soft);
+    vertical-align: middle;
+  }
+  .chart tr:last-child td {
+    border-bottom: 0;
+  }
+  .chart tbody tr {
+    transition: background-color 0.15s;
+  }
+  .chart tbody tr:hover {
+    background: color-mix(in srgb, var(--color-sunk) 70%, transparent);
+  }
+
+  /* Form input field */
+  .field {
+    display: block;
+    width: 100%;
+    border: 1px solid var(--color-rule);
+    border-radius: 10px;
+    padding: 0.6rem 0.85rem;
+    font-size: 0.95rem;
+    background: var(--color-raised);
+    color: var(--color-ink);
+    min-height: 44px;
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  .field:hover {
+    border-color: var(--color-rule-strong);
+  }
+  .field:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-brand) 28%, transparent);
+    border-color: var(--color-brand);
+  }
+  .field::placeholder {
+    color: var(--color-ink-3);
+  }
+
+  .label {
+    display: block;
+    font-size: var(--text-sm);
+    font-weight: 600;
+    margin-bottom: 0.35rem;
+    color: var(--color-ink);
+  }
+
+  .line-pending {
+    border-style: dashed !important;
+  }
+  .line-ended {
+    text-decoration: line-through;
+    text-decoration-thickness: 1.5px;
+    color: var(--color-ink-3);
+  }
+
+  /* Code swatch */
+  .swatch {
+    display: inline-block;
+    width: 0.75rem;
+    height: 0.75rem;
+    border-radius: 3px;
+    flex-shrink: 0;
+  }
+}
+
+/* Signature animations */
+@keyframes rise {
+  from {
+    opacity: 0.001;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.lit-row {
+  animation: rise 0.4s var(--ease-out-expo) both;
+}
+
+@keyframes grow {
+  from { transform: scaleX(0.001); }
+  to { transform: none; }
+}
+.bar-grow {
+  transform-origin: left center;
+  animation: grow 0.8s var(--ease-out-expo) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bar-grow, .lit-row {
+    animation: none;
+  }
+  body {
+    transition: none;
+  }
+}
+
+@media print {
+  .no-print { display: none !important; }
+  body { background: #fff; }
+}

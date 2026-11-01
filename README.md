@@ -4,8 +4,8 @@
 
 Network Track &bull; 24-Hour Cybersecurity Hackathon &bull; IIITDM Kancheepuram: *"Diagnosing Network Problems from Packet Captures."*
 
-- **Live app:** https://packetflow.vercel.app *(or deploy locally on port 3000)*
-- **Demo video:** [Watch the 3-Minute Video Walkthrough](https://youtu.be/demo-packetflow)
+- **Live app:** https://packet-flow-liart.vercel.app/
+- **Demo video:** [Watch the Video Walkthrough](https://app.guidde.com/share/playbooks/9JMNapz4kfSX32tKsrFB84?origin=dNvK68B0Anbz9YMO0dcTrgSfHUD3&mode=videoOnly)
 - **Try it without setup:** The home page has 1-click evaluation scenarios (ARP Cache Poisoning, Stealth SYN Scan, Covert DNS Tunneling & DGA, TCP Congestion & Outage, Rogue DHCP & IP Collision, MTU Black Hole, and Clean Baseline). All capture data is self-contained.
 
 ---

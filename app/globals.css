@@ -292,52 +292,22 @@
 @media print {
   @page {
     margin: 1.2cm;
-    size: A4 portrait;
+    size: auto;
   }
   .no-print,
   header,
   footer,
   nav,
-  aside,
-  [data-no-print],
-  .print\:hidden {
+  aside {
     display: none !important;
   }
   body {
     background: #ffffff !important;
     color: #0f172a !important;
-    font-size: 11pt !important;
-    line-height: 1.4 !important;
   }
   main {
     padding: 0 !important;
     margin: 0 !important;
     max-width: 100% !important;
-  }
-  * {
-    -webkit-print-color-adjust: exact !important;
-    print-color-adjust: exact !important;
-    box-shadow: none !important;
-    text-shadow: none !important;
-  }
-  /* Prevent boxes, cards, and tables from getting split across pages */
-  .break-inside-avoid,
-  .print-box,
-  div[class*="rounded-"],
-  div[class*="border"],
-  table,
-  tr,
-  tbody {
-    break-inside: avoid !important;
-    page-break-inside: avoid !important;
-  }
-  h1, h2, h3, h4, h5, h6 {
-    break-after: avoid !important;
-    page-break-after: avoid !important;
-  }
-  .h-full,
-  div[class*="items-stretch"] > * {
-    height: auto !important;
-    min-height: 0 !important;
   }
 }

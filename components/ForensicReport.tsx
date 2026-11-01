@@ -92,28 +92,6 @@ export function ForensicReport({ analysisResult, captureName }: ForensicReportPr
                 box-shadow: none !important;
                 backdrop-filter: none !important;
                 -webkit-backdrop-filter: none !important;
-                -webkit-print-color-adjust: exact !important;
-                print-color-adjust: exact !important;
-              }
-              /* Critical: Prevent cards and boxes from splitting across pages */
-              .print-avoid-break,
-              .break-inside-avoid,
-              div[class*="rounded-"],
-              div[class*="border"],
-              table,
-              tr,
-              tbody {
-                break-inside: avoid !important;
-                page-break-inside: avoid !important;
-              }
-              h1, h2, h3, h4, h5, h6 {
-                break-after: avoid !important;
-                page-break-after: avoid !important;
-              }
-              .h-full,
-              div[class*="items-stretch"] > * {
-                height: auto !important;
-                min-height: 0 !important;
               }
             }
           `,
@@ -174,10 +152,7 @@ export function ForensicReport({ analysisResult, captureName }: ForensicReportPr
         </div>
 
         {/* Chain of Custody & Cryptographic Hash */}
-        <div
-          className="p-4 bg-sunk rounded-[10px] border border-rule text-xs space-y-2 print-avoid-break"
-          style={{ breakInside: "avoid", pageBreakInside: "avoid" }}
-        >
+        <div className="p-4 bg-sunk rounded-[10px] border border-rule text-xs space-y-2">
           <div className="font-bold text-ink uppercase tracking-wider text-[11px] flex items-center gap-1.5">
             <Hash size={13} className="text-brand" />
             <span>Chain of Custody & Evidence Checksums</span>
@@ -203,15 +178,9 @@ export function ForensicReport({ analysisResult, captureName }: ForensicReportPr
         </div>
 
         {/* Executive Verdict & Risk Score Section (Symmetric 50/50 Layout) */}
-        <div
-          className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-stretch print-avoid-break"
-          style={{ breakInside: "avoid", pageBreakInside: "avoid" }}
-        >
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-stretch">
           {/* Radial Score Gauge (Left Equal Box) */}
-          <div
-            className="p-8 bg-canvas border border-rule rounded-2xl flex flex-col items-center justify-between text-center h-full shadow-xs print-avoid-break"
-            style={{ breakInside: "avoid", pageBreakInside: "avoid" }}
-          >
+          <div className="p-8 bg-canvas border border-rule rounded-2xl flex flex-col items-center justify-between text-center h-full shadow-xs">
             <div className="text-xs uppercase font-bold text-ink-3 tracking-wider">
               Composite Threat Risk Score
             </div>
@@ -264,10 +233,7 @@ export function ForensicReport({ analysisResult, captureName }: ForensicReportPr
           </div>
 
           {/* Classification & Plain Summary (Right Equal Box) */}
-          <div
-            className="p-8 bg-canvas border border-rule rounded-2xl flex flex-col justify-between h-full space-y-4 shadow-xs print-avoid-break"
-            style={{ breakInside: "avoid", pageBreakInside: "avoid" }}
-          >
+          <div className="p-8 bg-canvas border border-rule rounded-2xl flex flex-col justify-between h-full space-y-4 shadow-xs">
             <div>
               <div className="text-xs font-mono uppercase text-ink-3 font-bold tracking-wider">
                 Primary Diagnostic Classification
@@ -321,11 +287,7 @@ export function ForensicReport({ analysisResult, captureName }: ForensicReportPr
                 {findings
                   .filter(f => f.mitre_technique)
                   .map(f => (
-                    <tr
-                      key={f.id}
-                      className="hover:bg-raised-hover print-avoid-break"
-                      style={{ breakInside: "avoid", pageBreakInside: "avoid" }}
-                    >
+                    <tr key={f.id} className="hover:bg-raised-hover">
                       <td className="p-3 font-mono font-bold text-brand">
                         <a
                           href={f.mitre_technique?.url}
@@ -364,8 +326,7 @@ export function ForensicReport({ analysisResult, captureName }: ForensicReportPr
             {findings.map((f, i) => (
               <div
                 key={f.id}
-                className="p-5 bg-canvas border border-rule rounded-[10px] space-y-4 print:border-black/20 print-avoid-break shadow-2xs"
-                style={{ breakInside: "avoid", pageBreakInside: "avoid" }}
+                className="p-5 bg-canvas border border-rule rounded-[10px] space-y-4 print:border-black/20"
               >
                 <div className="flex flex-wrap items-center justify-between gap-2 border-b border-rule-soft pb-3">
                   <div className="flex items-center gap-2">
@@ -419,10 +380,7 @@ export function ForensicReport({ analysisResult, captureName }: ForensicReportPr
 
                 {/* Dual Remediation Plan */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs pt-2">
-                  <div
-                    className="p-3 bg-red-500/5 border border-red-500/20 rounded-[8px] print-avoid-break"
-                    style={{ breakInside: "avoid", pageBreakInside: "avoid" }}
-                  >
+                  <div className="p-3 bg-red-500/5 border border-red-500/20 rounded-[8px]">
                     <span className="font-bold uppercase text-[10px] text-red-600 block">
                       Immediate Action:
                     </span>
@@ -430,10 +388,7 @@ export function ForensicReport({ analysisResult, captureName }: ForensicReportPr
                       {f.recommended_remediation.immediate_action}
                     </p>
                   </div>
-                  <div
-                    className="p-3 bg-blue-500/5 border border-blue-500/20 rounded-[8px] print-avoid-break"
-                    style={{ breakInside: "avoid", pageBreakInside: "avoid" }}
-                  >
+                  <div className="p-3 bg-blue-500/5 border border-blue-500/20 rounded-[8px]">
                     <span className="font-bold uppercase text-[10px] text-blue-600 block">
                       Long-Term Fix:
                     </span>
@@ -448,10 +403,7 @@ export function ForensicReport({ analysisResult, captureName }: ForensicReportPr
         </div>
 
         {/* Forensic Sign-off Footer */}
-        <div
-          className="border-t border-rule pt-6 flex flex-wrap items-center justify-between text-xs text-ink-2 print-avoid-break"
-          style={{ breakInside: "avoid", pageBreakInside: "avoid" }}
-        >
+        <div className="border-t border-rule pt-6 flex flex-wrap items-center justify-between text-xs text-ink-2">
           <div>
             <span>Engine: </span>
             <span className="font-mono text-ink">PacketFlow Automated Diagnostic Core v1.0.0</span>

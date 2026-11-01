@@ -77,28 +77,6 @@ export default function RootLayout({
                   box-shadow: none !important;
                   backdrop-filter: none !important;
                   -webkit-backdrop-filter: none !important;
-                  -webkit-print-color-adjust: exact !important;
-                  print-color-adjust: exact !important;
-                }
-                /* Never slice cards, boxes, or tables across page boundaries */
-                .break-inside-avoid,
-                .print-box,
-                div[class*="rounded-"],
-                div[class*="border"],
-                table,
-                tr,
-                tbody {
-                  break-inside: avoid !important;
-                  page-break-inside: avoid !important;
-                }
-                h1, h2, h3, h4, h5, h6 {
-                  break-after: avoid !important;
-                  page-break-after: avoid !important;
-                }
-                .h-full,
-                div[class*="items-stretch"] > * {
-                  height: auto !important;
-                  min-height: 0 !important;
                 }
               }
             `,

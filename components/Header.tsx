@@ -45,7 +45,7 @@ export function Header() {
   ];
 
   return (
-    <header className="bg-raised/90 backdrop-blur-md border-b border-rule sticky top-0 z-40">
+    <header className="bg-raised/90 backdrop-blur-md border-b border-rule sticky top-0 z-40 print:hidden no-print">
       <div className="mx-auto max-w-[1360px] px-4 sm:px-8 h-16 flex items-center justify-between gap-6">
         {/* Left: Brand Wordmark */}
         <Link href="/" className="shrink-0 rounded-[10px] focus-visible:outline-none">

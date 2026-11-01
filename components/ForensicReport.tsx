@@ -50,7 +50,7 @@ export function ForensicReport({ analysisResult, captureName }: ForensicReportPr
   return (
     <div className="space-y-6">
       {/* Action Toolbar (hidden on print) */}
-      <div className="flex flex-wrap items-center justify-between gap-3 p-4 bg-raised border border-rule rounded-card print:hidden">
+      <div className="flex flex-wrap items-center justify-between gap-3 p-4 bg-raised border border-rule rounded-card print:hidden no-print">
         <div className="flex items-center gap-2 text-xs text-ink-2">
           <FileText size={15} className="text-brand" />
           <span>Forensic Chain of Custody & Audit Document</span>

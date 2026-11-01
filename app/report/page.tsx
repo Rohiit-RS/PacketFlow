@@ -11,9 +11,9 @@ export default function ReportPage() {
   const { report } = analysisResult;
 
   return (
-    <main className="mx-auto w-full max-w-[1360px] px-4 sm:px-8 py-6 sm:py-8 space-y-6">
+    <main className="mx-auto w-full max-w-[1360px] px-4 sm:px-8 py-6 sm:py-8 space-y-6 print:p-0 print:m-0 print:max-w-none print:space-y-0">
       {/* Top Breadcrumb Navigation & Title (hidden on print) */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-rule print:hidden">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-rule print:hidden no-print">
         <div>
           <div className="flex items-center gap-2.5 text-sm text-ink-3 mb-1.5">
             <Link

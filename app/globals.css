@@ -290,6 +290,24 @@
 }
 
 @media print {
-  .no-print { display: none !important; }
-  body { background: #fff; }
+  @page {
+    margin: 1.2cm;
+    size: auto;
+  }
+  .no-print,
+  header,
+  footer,
+  nav,
+  aside {
+    display: none !important;
+  }
+  body {
+    background: #ffffff !important;
+    color: #0f172a !important;
+  }
+  main {
+    padding: 0 !important;
+    margin: 0 !important;
+    max-width: 100% !important;
+  }
 }

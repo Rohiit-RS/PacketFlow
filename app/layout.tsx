@@ -45,7 +45,7 @@ export default function RootLayout({
         <CaptureProvider>
           <Header />
           <div className="flex-1 flex flex-col">{children}</div>
-          <footer className="border-t border-rule bg-raised mt-16 py-6 text-xs text-ink-3">
+          <footer className="border-t border-rule bg-raised mt-16 py-6 text-xs text-ink-3 print:hidden no-print">
             <div className="mx-auto max-w-[1360px] px-4 sm:px-8 flex flex-col sm:flex-row items-center justify-between gap-3">
               <div className="flex items-center gap-2">
                 <span className="font-bold text-ink">PacketFlow</span>

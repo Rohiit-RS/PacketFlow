@@ -65,7 +65,7 @@ Browser (Dashboard / Findings / Packets / Topology / Remediation / Report / Docs
    ├── lib/engine/attackDetector.ts ── Security Attacks: Port Scans, Sweeps, ARP MITM, Rogue DNS/DHCP, DGA, Exfiltration
    ├── lib/engine/differentiator.ts ── Causal Inference & Correlation: Induced Collateral Damage vs Root Cause Driver
    ├── lib/engine/pcapWriter.ts     ── Synthetic RFC-Compliant Binary PCAP Generator (Wireshark-ready export)
-   └── app/api/analyze/route.ts     ── Programmatic REST Endpoint (Strict Evaluation JSON Schema)
+   └── app/api/analyse/route.ts     ── Programmatic REST Endpoint (Strict Evaluation JSON Schema)
 ```
 
 - **Zero Native Wrappers:** 100% original TypeScript protocol parser and diagnostic state machines. Zero dependencies on Wireshark CLI, `tshark`, or `tcpdump` binary subprocesses (fully compliant with Rule 3).
@@ -83,7 +83,7 @@ Browser (Dashboard / Findings / Packets / Topology / Remediation / Report / Docs
 | `lib/context/` | `CaptureContext.tsx`: Client-side ingestion state, session persistence, and scenario loading |
 | `lib/utils/` | Forensic utilities: `hash.ts` (SHA-256 and MD5 implementation), `formatters.ts` (byte & timestamp formatting) |
 | `components/` | Modular UI components: `PacketInspector.tsx`, `NetworkTopology.tsx`, `RemediationGenerator.tsx`, `IncidentTimeline.tsx`, `ForensicReport.tsx` |
-| `app/` | Multi-page App Router architecture: `/`, `/findings`, `/findings/[id]`, `/packets`, `/flows`, `/topology`, `/remediation`, `/report`, `/schema`, `/docs`, `/api/analyze` |
+| `app/` | Multi-page App Router architecture: `/`, `/findings`, `/findings/[id]`, `/packets`, `/flows`, `/topology`, `/remediation`, `/report`, `/schema`, `/docs`, `/api/analyse` |
 
 ---
 
@@ -104,12 +104,12 @@ npm run build
 npm run start
 ```
 
-### Try the Programmatic API (`/api/analyze`)
+### Try the Programmatic API (`/api/analyse`)
 
 You can test the diagnostic engine via `curl` or HTTP client by posting raw JSON telemetry or multipart PCAP files:
 
 ```bash
-curl -X POST http://localhost:3000/api/analyze \
+curl -X POST http://localhost:3000/api/analyse \
   -H "Content-Type: application/json" \
   -d '[
     { "frame_number": 1, "timestamp": 1730419200.0, "length": 60, "protocol": "ARP", "arp_opcode": "REPLY", "arp_sender_ip": "192.168.1.1", "arp_sender_mac": "00:0c:29:8a:4f:1b", "info": "192.168.1.1 is at 00:0c:29:8a:4f:1b" },

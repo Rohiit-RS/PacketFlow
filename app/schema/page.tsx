@@ -10,7 +10,7 @@ import { toast } from "sonner";
 export default function SchemaPage() {
   const { analysisResult } = useCapture();
 
-  const curlCommand = `curl -X POST "https://your-domain.vercel.app/api/analyze" \\
+  const curlCommand = `curl -X POST "https://your-domain.vercel.app/api/analyse" \\
   --data-binary "@sample-captures/1_arp_spoofing_mitm.pcap" \\
   -H "Content-Type: application/octet-stream"`;
 
@@ -52,7 +52,7 @@ export default function SchemaPage() {
       <Panel className="p-6 space-y-4">
         <div className="flex items-center justify-between">
           <SectionTitle sub="Programmatic PCAP analysis via HTTP POST">
-            REST API Endpoint: /api/analyze
+            REST API Endpoint: /api/analyse
           </SectionTitle>
           <Button variant="secondary" size="sm" onClick={copyCurl}>
             <Copy size={13} />

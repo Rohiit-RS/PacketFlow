@@ -5,8 +5,8 @@ const nextConfig: NextConfig = {
   async rewrites() {
     return [
       {
-        source: "/api/analyse",
-        destination: "/api/analyze",
+        source: "/api/analyze",
+        destination: "/api/analyse",
       },
     ];
   },

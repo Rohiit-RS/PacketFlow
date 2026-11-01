@@ -31,7 +31,20 @@ export function ForensicReport({ analysisResult, captureName }: ForensicReportPr
   const { summary, findings } = report;
 
   const handlePrint = () => {
+    // Immediate pre-print safety hide for website header and footer
+    const elementsToHide = document.querySelectorAll("header, footer, nav, aside, .no-print, [data-no-print]");
+    elementsToHide.forEach((el) => {
+      (el as HTMLElement).style.setProperty("display", "none", "important");
+    });
+
     window.print();
+
+    // Restore after print dialog closes
+    setTimeout(() => {
+      elementsToHide.forEach((el) => {
+        (el as HTMLElement).style.removeProperty("display");
+      });
+    }, 1000);
   };
 
   // Calculate composite risk score (0-100)
@@ -49,6 +62,41 @@ export function ForensicReport({ analysisResult, captureName }: ForensicReportPr
 
   return (
     <div className="space-y-6">
+      <style
+        dangerouslySetInnerHTML={{
+          __html: `
+            @media print {
+              @page {
+                margin: 0;
+                size: auto;
+              }
+              header, footer, nav, aside, .no-print, [data-no-print], .print\\:hidden {
+                display: none !important;
+                visibility: hidden !important;
+                height: 0 !important;
+                width: 0 !important;
+                overflow: hidden !important;
+                position: absolute !important;
+                top: -9999px !important;
+                left: -9999px !important;
+                opacity: 0 !important;
+                pointer-events: none !important;
+              }
+              body {
+                background: #ffffff !important;
+                color: #0f172a !important;
+                padding: 1.2cm !important;
+              }
+              * {
+                position: static !important;
+                box-shadow: none !important;
+                backdrop-filter: none !important;
+                -webkit-backdrop-filter: none !important;
+              }
+            }
+          `,
+        }}
+      />
       {/* Action Toolbar (hidden on print) */}
       <div className="flex flex-wrap items-center justify-between gap-3 p-4 bg-raised border border-rule rounded-card print:hidden no-print">
         <div className="flex items-center gap-2 text-xs text-ink-2">

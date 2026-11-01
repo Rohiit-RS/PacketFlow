@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Download } from "lucide-react";
@@ -14,6 +15,28 @@ export function Header() {
   const { analysisResult } = useCapture();
 
   const findingsCount = analysisResult.report.findings.length;
+
+  // Bulletproof print listener: guarantee header is removed before print dialog renders
+  useEffect(() => {
+    const handleBeforePrint = () => {
+      const headerEl = document.querySelector("header");
+      if (headerEl) headerEl.style.display = "none";
+      const footerEl = document.querySelector("footer");
+      if (footerEl) footerEl.style.display = "none";
+    };
+    const handleAfterPrint = () => {
+      const headerEl = document.querySelector("header");
+      if (headerEl) headerEl.style.display = "";
+      const footerEl = document.querySelector("footer");
+      if (footerEl) footerEl.style.display = "";
+    };
+    window.addEventListener("beforeprint", handleBeforePrint);
+    window.addEventListener("afterprint", handleAfterPrint);
+    return () => {
+      window.removeEventListener("beforeprint", handleBeforePrint);
+      window.removeEventListener("afterprint", handleAfterPrint);
+    };
+  }, []);
 
   const downloadReportJson = () => {
     try {
@@ -45,7 +68,11 @@ export function Header() {
   ];
 
   return (
-    <header className="bg-raised/90 backdrop-blur-md border-b border-rule sticky top-0 z-40 print:hidden no-print">
+    <header
+      id="site-header"
+      data-no-print="true"
+      className="bg-raised/90 backdrop-blur-md border-b border-rule sticky top-0 z-40 print:hidden no-print"
+    >
       <div className="mx-auto max-w-[1360px] px-4 sm:px-8 h-16 flex items-center justify-between gap-6">
         {/* Left: Brand Wordmark */}
         <Link href="/" className="shrink-0 rounded-[10px] focus-visible:outline-none">

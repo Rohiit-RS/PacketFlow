@@ -89,59 +89,22 @@ Browser (Dashboard / Findings / Packets / Topology / Remediation / Report / Docs
 
 ## Run it locally
 
-**Requirements:** Node 18+ (tested on Node 20 and Node 22).
+Requirements: Node 18+ (tested on Node 20 and Node 22).
 
 ```bash
-# 1. Install dependencies
 npm install
-
-# 2. Start development server
 npm run dev
-# App will be live at http://localhost:3000
-
-# 3. Or create an optimized production build
-npm run build
-npm run start
 ```
 
-### Try the Programmatic API (`/api/analyse`)
-
-You can test the diagnostic engine via `curl` or HTTP client by posting raw JSON telemetry or multipart PCAP files:
-
-```bash
-curl -X POST http://localhost:3000/api/analyse \
-  -H "Content-Type: application/json" \
-  -d '[
-    { "frame_number": 1, "timestamp": 1730419200.0, "length": 60, "protocol": "ARP", "arp_opcode": "REPLY", "arp_sender_ip": "192.168.1.1", "arp_sender_mac": "00:0c:29:8a:4f:1b", "info": "192.168.1.1 is at 00:0c:29:8a:4f:1b" },
-    { "frame_number": 2, "timestamp": 1730419200.05, "length": 60, "protocol": "ARP", "arp_opcode": "REPLY", "arp_sender_ip": "192.168.1.1", "arp_sender_mac": "00:0c:29:8a:4f:1b", "info": "192.168.1.1 is at 00:0c:29:8a:4f:1b" },
-    { "frame_number": 3, "timestamp": 1730419200.1, "length": 60, "protocol": "ARP", "arp_opcode": "REPLY", "arp_sender_ip": "192.168.1.1", "arp_sender_mac": "00:0c:29:8a:4f:1b", "info": "192.168.1.1 is at 00:0c:29:8a:4f:1b" }
-  ]'
-```
+App will be live at `http://localhost:3000`.
 
 ---
 
 ## Deploy (Vercel)
 
-PacketFlow is built on standard Next.js 15 and is 100% serverless-ready for instant Vercel deployment:
-
-### Option A: Via GitHub (Recommended)
-1. Push your repository to GitHub:
-   ```bash
-   git remote add origin https://github.com/<your-username>/PacketFlow.git
-   git branch -M main
-   git push -u origin main
-   ```
-2. Open [vercel.com](https://vercel.com) &rarr; **"Add New..."** &rarr; **"Project"**.
-3. Import your **`PacketFlow`** repository.
-4. Leave all settings as default (Framework: Next.js, Build: `next build`, Output: `.next`).
-5. Click **"Deploy"**. The app will be live globally in ~60 seconds.
-
-### Option B: Via Vercel CLI
-```bash
-npm i -g vercel
-vercel
-vercel --prod
-```
+1. Import the GitHub repository in Vercel (framework: Next.js).
+2. Deploy directly with zero configuration (no environment variables or external databases required).
+3. Open `/` to test the preloaded capture scenarios or drop in your own `.pcap` files.
 
 ---
 

@@ -8,6 +8,10 @@ const nextConfig: NextConfig = {
         source: "/api/analyze",
         destination: "/api/analyse",
       },
+      {
+        source: "/schema",
+        destination: "/api",
+      },
     ];
   },
   // Safe header policies for diagnostic telemetry

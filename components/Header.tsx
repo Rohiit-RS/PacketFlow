@@ -13,6 +13,7 @@ import {
   Network,
   Wrench,
   FileText,
+  Terminal,
 } from "lucide-react";
 import { Wordmark } from "./shell/Logo";
 import { ThemeToggle } from "./shell/ThemeToggle";
@@ -51,7 +52,7 @@ export function Header() {
     { href: "/topology", label: "Topology", icon: Network, badge: null },
     { href: "/remediation", label: "Remediation", icon: Wrench, badge: null },
     { href: "/report", label: "Report", icon: FileText, badge: null },
-    { href: "/schema", label: "JSON", icon: FileJson, badge: null },
+    { href: "/api", label: "API & Schema", icon: Terminal, badge: null },
     { href: "/docs", label: "Docs", icon: BookOpen, badge: null },
   ];
 

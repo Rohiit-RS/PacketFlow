@@ -83,7 +83,7 @@ Browser (Dashboard / Findings / Packets / Topology / Remediation / Report / Docs
 | `lib/context/` | `CaptureContext.tsx`: Client-side ingestion state, session persistence, and scenario loading |
 | `lib/utils/` | Forensic utilities: `hash.ts` (SHA-256 and MD5 implementation), `formatters.ts` (byte & timestamp formatting) |
 | `components/` | Modular UI components: `PacketInspector.tsx`, `NetworkTopology.tsx`, `RemediationGenerator.tsx`, `IncidentTimeline.tsx`, `ForensicReport.tsx` |
-| `app/` | Multi-page App Router architecture: `/`, `/findings`, `/findings/[id]`, `/packets`, `/flows`, `/topology`, `/remediation`, `/report`, `/schema`, `/docs`, `/api/analyse` |
+| `app/` | Multi-page App Router architecture: `/`, `/findings`, `/findings/[id]`, `/packets`, `/flows`, `/topology`, `/remediation`, `/report`, `/api`, `/docs`, `/api/analyse` |
 
 ---
 

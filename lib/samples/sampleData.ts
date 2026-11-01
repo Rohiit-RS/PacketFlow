@@ -82,6 +82,26 @@ const arpSpoofPackets: ParsedPacket[] = [
     tcp_window_size: 64240,
     payload_preview: "GET /login HTTP/1.1\r\nHost: intranet.corp\r\nAuthorization: Basic dXNlcjpwYXNz\r\n\r\n",
   },
+  // Retransmissions induced by hijacked route packet dropping
+  ...[9, 10, 11, 12].map((num, i) => ({
+    frame_number: num,
+    timestamp: 1730419200.3 + i * 0.2,
+    timestamp_iso: `2026-10-31T21:00:00.${300 + i * 200}Z`,
+    length: 120,
+    protocol: "TCP" as const,
+    source_ip: "192.168.1.50",
+    destination_ip: "93.184.216.34",
+    source_mac: "00:1a:2b:3c:4d:01",
+    destination_mac: "00:0c:29:8a:4f:1b",
+    source_port: 52144,
+    destination_port: 80,
+    info: `52144 -> 80 [TCP Retransmission] Seq=1 Len=66 (Packet dropped by attacker)`,
+    tcp_flags: { psh: true, ack: true },
+    tcp_seq: 1,
+    tcp_ack: 1,
+    tcp_window_size: 64240,
+    payload_preview: "GET /login HTTP/1.1\r\nHost: intranet.corp\r\nAuthorization: Basic dXNlcjpwYXNz\r\n\r\n",
+  })),
 ];
 
 /** 2. Stealth SYN Port Scan & Subnet Reconnaissance */
@@ -199,6 +219,33 @@ const dnsTunnelPackets: ParsedPacket[] = [
     dns_query: "bank-portal.internal",
     dns_response_code: 0,
     info: "Standard query response 0x1a2b NoError A bank-portal.internal -> 192.168.1.189 (Rogue Redirect)",
+  },
+  // Algorithmic DGA C2 queries
+  {
+    frame_number: 5,
+    timestamp: 1730419220.35,
+    length: 85,
+    protocol: "DNS",
+    source_ip: "192.168.1.100",
+    destination_ip: "1.1.1.1",
+    source_port: 54130,
+    destination_port: 53,
+    dns_query: "x8nz92mqkdfp.cc",
+    dns_qtype: "A",
+    info: "Standard query 0x2b3c A x8nz92mqkdfp.cc (DGA C2 Beacon)",
+  },
+  {
+    frame_number: 6,
+    timestamp: 1730419220.45,
+    length: 85,
+    protocol: "DNS",
+    source_ip: "192.168.1.100",
+    destination_ip: "1.1.1.1",
+    source_port: 54131,
+    destination_port: 53,
+    dns_query: "q9vbt47xwzlp.biz",
+    dns_qtype: "A",
+    info: "Standard query 0x2b3d A q9vbt47xwzlp.biz (DGA C2 Beacon)",
   },
 ];
 

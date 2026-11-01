@@ -158,6 +158,40 @@ export default function FindingDetailPage({ params }: FindingPageProps) {
             {finding.plain_language_explanation}
           </p>
         </div>
+
+        {/* Causal Correlation Callout */}
+        {finding.correlation && (
+          <div className={cn(
+            "p-6 rounded-2xl border flex items-start gap-4 transition-colors",
+            finding.correlation.relation_type === "INDUCED_COLLATERAL_DAMAGE"
+              ? "bg-amber-500/10 border-amber-500/30 text-ink"
+              : "bg-red-500/10 border-red-500/30 text-ink"
+          )}>
+            <Zap size={22} className={finding.correlation.relation_type === "INDUCED_COLLATERAL_DAMAGE" ? "text-amber-500 shrink-0 mt-0.5" : "text-flag shrink-0 mt-0.5"} />
+            <div className="space-y-1.5">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className={cn(
+                  "text-xs font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-md font-mono",
+                  finding.correlation.relation_type === "INDUCED_COLLATERAL_DAMAGE"
+                    ? "bg-amber-500/20 text-amber-600 dark:text-amber-400"
+                    : "bg-red-500/20 text-red-600 dark:text-red-400"
+                )}>
+                  {finding.correlation.relation_type === "INDUCED_COLLATERAL_DAMAGE" ? "⚡ Induced Collateral Symptom" : "🎯 Root Cause Driver"}
+                </span>
+                <Link
+                  href={`/findings/${finding.correlation.related_finding_id}`}
+                  className="text-xs font-mono font-bold text-brand hover:underline inline-flex items-center gap-1"
+                >
+                  Correlated with {finding.correlation.related_finding_id}
+                  <ArrowRight size={12} />
+                </Link>
+              </div>
+              <p className="text-base text-ink-2 leading-relaxed font-medium">
+                {finding.correlation.explanation}
+              </p>
+            </div>
+          </div>
+        )}
       </Panel>
 
       {/* Technical Breakdown & Root Cause */}

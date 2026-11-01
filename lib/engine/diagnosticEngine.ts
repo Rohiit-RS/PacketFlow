@@ -11,7 +11,8 @@ import { detectSecurityAttacks } from "./attackDetector";
 import {
   buildFlows,
   buildDiagnosticReport,
-  computeAnalysisStats
+  computeAnalysisStats,
+  correlateFindings
 } from "./differentiator";
 
 export class DiagnosticEngine {
@@ -62,11 +63,14 @@ export class DiagnosticEngine {
     // Combine all findings
     const allFindings = [...attacks, ...faults];
 
-    // Step 4: Differentiate, score, and build strict JSON diagnostic report
+    // Step 4: Cross-Layer Incident Correlation & Causal Inference
+    const timeline = correlateFindings(allFindings, packets);
+
+    // Step 5: Differentiate, score, and build strict JSON diagnostic report
     const report = buildDiagnosticReport(packets, allFindings);
 
-    // Step 5: Compute auxiliary telemetry stats for the UI
-    const stats = computeAnalysisStats(packets, allFindings, flows);
+    // Step 6: Compute auxiliary telemetry stats for the UI
+    const stats = computeAnalysisStats(packets, allFindings, flows, timeline);
 
     return {
       report,

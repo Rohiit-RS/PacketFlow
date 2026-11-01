@@ -16,6 +16,7 @@ import {
 import { Button, Chip, Panel, SectionTitle, Swatch, cn } from "@/components/ui";
 import { useCapture } from "@/lib/context/CaptureContext";
 import { Finding } from "@/lib/engine/types";
+import { IncidentTimeline } from "@/components/IncidentTimeline";
 
 type FilterType = "ALL" | "ATTACK" | "FAULT" | "CRITICAL";
 
@@ -134,6 +135,11 @@ export default function FindingsPage() {
         </div>
       </div>
 
+      {/* Incident Kill-Chain Timeline */}
+      {filter === "ALL" && !search && (
+        <IncidentTimeline timeline={analysisResult.stats.incident_timeline} />
+      )}
+
       {/* Findings List */}
       {filteredFindings.length === 0 ? (
         <Panel className="p-12 text-center border-dashed border-rule-strong">
@@ -207,6 +213,25 @@ export default function FindingsPage() {
                       {finding.plain_language_explanation}
                     </p>
                   </div>
+
+                  {/* Causal Correlation Callout */}
+                  {finding.correlation && (
+                    <div className={cn(
+                      "p-3 rounded-[10px] border flex items-center gap-2.5 text-xs",
+                      finding.correlation.relation_type === "INDUCED_COLLATERAL_DAMAGE"
+                        ? "bg-amber-500/10 border-amber-500/30 text-ink"
+                        : "bg-red-500/10 border-red-500/30 text-ink"
+                    )}>
+                      <Zap size={15} className={finding.correlation.relation_type === "INDUCED_COLLATERAL_DAMAGE" ? "text-amber-500 shrink-0" : "text-flag shrink-0"} />
+                      <span className="font-bold">
+                        {finding.correlation.relation_type === "INDUCED_COLLATERAL_DAMAGE" ? "⚡ Induced Collateral Symptom:" : "🎯 Root Cause Driver:"}
+                      </span>
+                      <span className="text-ink-2 truncate">{finding.correlation.explanation}</span>
+                      <Link href={`/findings/${finding.correlation.related_finding_id}`} className="text-brand font-mono font-bold hover:underline shrink-0 ml-auto">
+                        {finding.correlation.related_finding_id} &rarr;
+                      </Link>
+                    </div>
+                  )}
 
                   {/* Root Cause & Evidence Preview */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1">

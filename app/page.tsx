@@ -137,6 +137,20 @@ export default function Home() {
                         <p className="text-sm text-ink-2 line-clamp-2 leading-relaxed">
                           {finding.plain_language_explanation}
                         </p>
+                        {finding.correlation && (
+                          <div className={cn(
+                            "mt-2 text-xs font-mono font-semibold flex items-center gap-1.5",
+                            finding.correlation.relation_type === "INDUCED_COLLATERAL_DAMAGE"
+                              ? "text-amber-600 dark:text-amber-400"
+                              : "text-red-600 dark:text-red-400"
+                          )}>
+                            <span>
+                              {finding.correlation.relation_type === "INDUCED_COLLATERAL_DAMAGE"
+                                ? "⚡ Induced Collateral Symptom (Correlated)"
+                                : "🎯 Root Cause Driver"}
+                            </span>
+                          </div>
+                        )}
                       </div>
                     </Link>
                   );

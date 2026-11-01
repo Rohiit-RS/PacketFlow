@@ -542,5 +542,71 @@ export function detectSecurityAttacks(
     });
   }
 
+  // 8. Algorithmic Domain Generation (DGA) / Malware C2 Activity
+  const dgaQueries: { pkt: ParsedPacket; domain: string }[] = [];
+  for (const pkt of packets) {
+    if (pkt.protocol === "DNS" && pkt.dns_query) {
+      const parts = pkt.dns_query.toLowerCase().split(".");
+      const sld = parts.length >= 2 ? parts[parts.length - 2] : parts[0];
+      if (sld && sld.length >= 8 && sld.length <= 25) {
+        // Test consonant clustering: e.g. 5 consecutive consonants without vowels
+        const hasConsonantClustering = /[^aeiou0-9]{5,}/.test(sld);
+        // Test mixed alphanumeric randomness (e.g. letters and numbers interleaved)
+        const hasInterleavedNumbers = /[a-z]+[0-9]+[a-z]+/.test(sld);
+        // Test entropy
+        const charMap = new Map<string, number>();
+        for (const c of sld) charMap.set(c, (charMap.get(c) || 0) + 1);
+        let entropy = 0;
+        for (const count of charMap.values()) {
+          const p = count / sld.length;
+          entropy -= p * Math.log2(p);
+        }
+        
+        if ((entropy > 3.1 && hasConsonantClustering) || (entropy > 3.4 && hasInterleavedNumbers)) {
+          dgaQueries.push({ pkt, domain: pkt.dns_query });
+        }
+      }
+    }
+  }
+
+  if (dgaQueries.length >= 2) {
+    const srcHost = dgaQueries[0].pkt.source_ip || "Internal Host";
+    findings.push({
+      id: nextId(),
+      category: "ATTACK",
+      issue_title: `Algorithmic DGA Malware Command-and-Control (C2) Activity from ${srcHost}`,
+      severity: "CRITICAL",
+      confidence_score: 96,
+      plain_language_explanation:
+        `A compromised computer (${srcHost}) is querying pseudo-randomly generated domain names in an automated attempt to rendezvous with an external hacker Command-and-Control (C2) server.`,
+      technical_details: {
+        root_cause: `Observed ${dgaQueries.length} DNS lookups exhibiting high entropy, non-lexical consonant clustering, and randomized string structures (e.g. '${dgaQueries[0].domain}', '${dgaQueries[1]?.domain || ""}'). Consistent with Domain Generation Algorithms (DGA) used by botnets/ransomware (such as Conficker, Mirai, or Emotet) to evade static domain blacklists.`,
+        evidence_packets: dgaQueries.slice(0, 4).map(d => `Frame #${d.pkt.frame_number} DGA Query: '${d.domain}' from ${d.pkt.source_ip}`),
+      },
+      recommended_remediation: {
+        immediate_action: `Quarantine machine ${srcHost} from the local network and execute full endpoint malware scanning.`,
+        long_term_fix: "Enable DNS Sinkholing and implement threat intelligence feeds (STIX/TAXII) to automatically block algorithmic DGA TLD patterns at the perimeter resolver.",
+      },
+      mitre_technique: {
+        id: "T1568.002",
+        name: "Dynamic Resolution: Domain Generation Algorithms",
+        tactic: "Command and Control",
+        url: "https://attack.mitre.org/techniques/T1568/002",
+      },
+      cwe: {
+        id: "CWE-346",
+        name: "Origin Validation Error",
+        url: "https://cwe.mitre.org/data/definitions/346.html",
+      },
+      remediation_rules: {
+        iptables: `iptables -A OUTPUT -p udp --dport 53 -s ${srcHost} -j DROP\niptables -A INPUT -s ${srcHost} -j DROP`,
+        snort: `alert udp ${srcHost} any -> any 53 (msg:"PACKETFLOW: DGA Malware C2 Beacon Detected"; pcre:"/\\b[a-z0-9]{10,25}\\.(com|net|org|cc|xyz|top)\\b/i"; sid:1000007; rev:1;)`,
+        cisco: `access-list 125 remark Quarantine DGA Host\naccess-list 125 deny ip host ${srcHost} any\naccess-list 125 permit ip any any`,
+      },
+      affected_ips: [srcHost],
+      affected_ports: [53],
+    });
+  }
+
   return findings;
 }

@@ -15,8 +15,9 @@ export function detectNetworkFaults(
 
   const nextId = () => `FINDING-${String(idCounter++).padStart(3, "0")}`;
 
-  // 1. TCP Retransmissions & Packet Loss
+  // 1. TCP Retransmissions, Out-of-Order & Resets
   const streamSeqMap = new Map<string, Map<number, ParsedPacket[]>>();
+  const streamMaxSeq = new Map<string, number>();
   const retransmissionPackets: ParsedPacket[] = [];
   const outOfOrderPackets: ParsedPacket[] = [];
   const zeroWindowPackets: ParsedPacket[] = [];
@@ -42,11 +43,18 @@ export function detectNetworkFaults(
           streamSeqMap.set(flowKey, new Map());
         }
         const seqMap = streamSeqMap.get(flowKey)!;
+        const maxSeq = streamMaxSeq.get(flowKey) || 0;
+
         if (seqMap.has(pkt.tcp_seq)) {
           // Same sequence number with payload re-sent = retransmission
           retransmissionPackets.push(pkt);
+        } else if (maxSeq > 0 && pkt.tcp_seq < maxSeq) {
+          // Sequence number arrived behind highest seen sequence = Out of Order
+          outOfOrderPackets.push(pkt);
+          seqMap.set(pkt.tcp_seq, [pkt]);
         } else {
           seqMap.set(pkt.tcp_seq, [pkt]);
+          streamMaxSeq.set(flowKey, Math.max(maxSeq, pkt.tcp_seq + (pkt.length - 54)));
         }
       }
     }
@@ -127,6 +135,78 @@ export function detectNetworkFaults(
         iptables: `sysctl -w net.ipv4.tcp_rmem="4096 87380 6291456"\nsysctl -w net.core.rmem_max=16777216`,
       },
       affected_ips: Array.from(new Set(zeroWindowPackets.map(p => p.source_ip || "").filter(Boolean))),
+    });
+  }
+
+  // Evaluate TCP Out-of-Order Packet Delivery
+  if (outOfOrderPackets.length >= 2) {
+    const evidence = outOfOrderPackets.slice(0, 4).map(
+      p => `Frame #${p.frame_number} [TCP Out-Of-Order] Seq=${p.tcp_seq} (${p.source_ip}:${p.source_port} -> ${p.destination_ip}:${p.destination_port})`
+    );
+
+    findings.push({
+      id: nextId(),
+      category: "FAULT",
+      issue_title: `TCP Out-of-Order Segment Delivery & Reordering Jitter`,
+      severity: "MEDIUM",
+      confidence_score: 92,
+      plain_language_explanation:
+        "Packets arrived in a different sequence than they were originally transmitted. The receiving device is forced to pause and buffer data until the missing gap arrives, causing stuttering and jitter.",
+      technical_details: {
+        root_cause: `Observed ${outOfOrderPackets.length} TCP segments delivered with sequence numbers arriving behind the highest observed sequence on the same unidirectional stream. Indicates multi-path link jitter, asymmetric ECMP (Equal-Cost Multi-Path) hashing across intermediate switches, or link-layer reordering.`,
+        evidence_packets: evidence,
+      },
+      recommended_remediation: {
+        immediate_action:
+          "Check intermediate switch bonding/LACP or multi-path routing policies to verify per-flow hashing (L4 5-tuple) rather than per-packet distribution.",
+        long_term_fix:
+          "Enable TCP SACK (Selective Acknowledgement) across end-hosts (`net.ipv4.tcp_sack = 1`) to prevent retransmission storms when packets arrive out-of-order.",
+      },
+      cwe: {
+        id: "CWE-400",
+        name: "Uncontrolled Resource Consumption (Packet Reordering Delay)",
+        url: "https://cwe.mitre.org/data/definitions/400.html",
+      },
+      remediation_rules: {
+        iptables: `sysctl -w net.ipv4.tcp_sack=1\nsysctl -w net.ipv4.tcp_dsack=1`,
+      },
+      affected_ips: Array.from(new Set(outOfOrderPackets.map(p => p.source_ip || "").filter(Boolean))),
+    });
+  }
+
+  // Evaluate TCP Reset (RST) Storms
+  if (tcpResetPackets.length >= 5) {
+    const evidence = tcpResetPackets.slice(0, 4).map(
+      p => `Frame #${p.frame_number} [TCP RST] ${p.source_ip}:${p.source_port} -> ${p.destination_ip}:${p.destination_port}`
+    );
+
+    findings.push({
+      id: nextId(),
+      category: "FAULT",
+      issue_title: `Abnormal TCP Connection Reset (RST) Storm`,
+      severity: "HIGH",
+      confidence_score: 89,
+      plain_language_explanation:
+        "Servers or clients are aggressively sending connection Reset (RST) signals to violently terminate connections rather than closing them cleanly. This suddenly drops active sessions.",
+      technical_details: {
+        root_cause: `Encountered ${tcpResetPackets.length} TCP RST packets across active connections. Typically caused by applications crashing and abruptly closing open sockets, stateful firewalls dropping idle TCP connections without notifying endpoints, or connection attempts to non-listening ports.`,
+        evidence_packets: evidence,
+      },
+      recommended_remediation: {
+        immediate_action:
+          "Inspect server application logs for out-of-memory or worker process crashes at the timestamps of the RST bursts.",
+        long_term_fix:
+          "Tune stateful firewall connection tracking idle timeouts (`nf_conntrack_tcp_timeout_established`) and implement TCP keep-alive on clients.",
+      },
+      cwe: {
+        id: "CWE-400",
+        name: "Uncontrolled Resource Consumption",
+        url: "https://cwe.mitre.org/data/definitions/400.html",
+      },
+      remediation_rules: {
+        iptables: `sysctl -w net.netfilter.nf_conntrack_tcp_timeout_established=86400`,
+      },
+      affected_ips: Array.from(new Set(tcpResetPackets.map(p => p.source_ip || "").filter(Boolean))),
     });
   }
 

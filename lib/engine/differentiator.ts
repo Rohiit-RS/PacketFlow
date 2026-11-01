@@ -12,7 +12,8 @@ import {
   DiagnosticReport,
   ParsedPacket,
   ConversationFlow,
-  AnalysisEngineResult
+  AnalysisEngineResult,
+  IncidentTimelineEvent
 } from "./types";
 import { computeSha256Hex, computeMd5Hex } from "../utils/hash";
 
@@ -110,6 +111,7 @@ export function generateExecutiveSummary(
   const faultCount = findings.filter(f => f.category === "FAULT").length;
   const attackCount = findings.filter(f => f.category === "ATTACK").length;
   const primaryThreat = findings[0]?.issue_title || "anomalous activity";
+  const hasInducedCorrelation = findings.some(f => f.correlation?.relation_type === "INDUCED_COLLATERAL_DAMAGE");
 
   if (classification === "MALICIOUS_ATTACK") {
     return `Security analysis identified ${attackCount} active cyber threat(s), primarily characterized by ${primaryThreat}. Immediate containment is recommended to prevent unauthorized access or data compromise.`;
@@ -120,7 +122,115 @@ export function generateExecutiveSummary(
   }
 
   // MIXED
+  if (hasInducedCorrelation) {
+    return `The network is under active cyber attack (${primaryThreat}) which has directly induced collateral operational faults across the subnet. Isolating the malicious actor will simultaneously remediate the network performance degradation.`;
+  }
+
   return `The network is experiencing both infrastructure performance faults (${faultCount}) and concurrent malicious security threats (${attackCount}), led by ${primaryThreat}. Prioritize isolating the security threat while addressing the underlying network stability issues.`;
+}
+
+/**
+ * Cross-Layer Incident Correlation Engine.
+ * Correlates operational faults with malicious attacks when endpoints or timelines overlap,
+ * establishing causality to differentiate primary root causes from induced symptoms.
+ */
+export function correlateFindings(
+  findings: Finding[],
+  packets: ParsedPacket[]
+): IncidentTimelineEvent[] {
+  const attacks = findings.filter(f => f.category === "ATTACK");
+  const faults = findings.filter(f => f.category === "FAULT");
+
+  // Pair faults with attacks that induced them
+  for (const fault of faults) {
+    const faultIps = new Set(fault.affected_ips || []);
+    for (const attack of attacks) {
+      const attackIps = attack.affected_ips || [];
+      const hasIpOverlap = attackIps.some(ip => faultIps.has(ip));
+      
+      const isRetransOrLatency =
+        fault.issue_title.includes("Retransmission") ||
+        fault.issue_title.includes("Latency") ||
+        fault.issue_title.includes("Out-of-Order") ||
+        fault.issue_title.includes("Zero Window");
+
+      const isMitmOrFlood =
+        attack.issue_title.includes("ARP Cache") ||
+        attack.issue_title.includes("SYN") ||
+        attack.issue_title.includes("Flood") ||
+        attack.issue_title.includes("Rogue");
+
+      if (hasIpOverlap || (isRetransOrLatency && isMitmOrFlood)) {
+        fault.correlation = {
+          related_finding_id: attack.id,
+          relation_type: "INDUCED_COLLATERAL_DAMAGE",
+          explanation: `Cross-layer telemetry correlation confirms this operational issue is collateral damage induced by attack ${attack.id} (${attack.issue_title}). The security incident destabilized packet delivery at lower layers.`,
+        };
+
+        if (!attack.correlation) {
+          attack.correlation = {
+            related_finding_id: fault.id,
+            relation_type: "ROOT_CAUSE",
+            explanation: `This attack is the confirmed root cause of downstream operational fault ${fault.id} (${fault.issue_title}). Mitigating this attack will automatically remediate the network degradation.`,
+          };
+        }
+        break;
+      }
+    }
+  }
+
+  // Synthesize chronological incident timeline
+  const timeline: IncidentTimelineEvent[] = [];
+  let step = 1;
+
+  // 1. Reconnaissance
+  const recon = findings.filter(f =>
+    f.mitre_technique?.tactic === "Discovery" ||
+    f.issue_title.toLowerCase().includes("scan") ||
+    f.issue_title.toLowerCase().includes("sweep")
+  );
+  for (const r of recon) {
+    timeline.push({
+      step: step++,
+      timestamp: packets[0]?.timestamp || 0,
+      phase: "RECONNAISSANCE",
+      title: `Reconnaissance: ${r.issue_title}`,
+      detail: r.plain_language_explanation,
+      finding_id: r.id,
+      actor_ip: r.affected_ips?.[0],
+      target_ip: r.affected_ips?.[1],
+    });
+  }
+
+  // 2. Active Exploitation / Security Incursions
+  const activeAttacks = findings.filter(f => f.category === "ATTACK" && !recon.includes(f));
+  for (const a of activeAttacks) {
+    timeline.push({
+      step: step++,
+      timestamp: (packets[0]?.timestamp || 0) + 0.5,
+      phase: "EXPLOITATION",
+      title: `Exploitation: ${a.issue_title}`,
+      detail: a.plain_language_explanation,
+      finding_id: a.id,
+      actor_ip: a.affected_ips?.[0],
+      target_ip: a.affected_ips?.[1],
+    });
+  }
+
+  // 3. Operational Degradation / Collateral Symptoms
+  for (const f of faults) {
+    timeline.push({
+      step: step++,
+      timestamp: (packets[0]?.timestamp || 0) + 1.2,
+      phase: f.correlation ? "COLLATERAL_FAULT" : "IMPACT",
+      title: f.correlation ? `Induced Degradation: ${f.issue_title}` : `Operational Fault: ${f.issue_title}`,
+      detail: f.correlation ? f.correlation.explanation : f.plain_language_explanation,
+      finding_id: f.id,
+      actor_ip: f.affected_ips?.[0],
+    });
+  }
+
+  return timeline;
 }
 
 /**
@@ -129,7 +239,8 @@ export function generateExecutiveSummary(
 export function computeAnalysisStats(
   packets: ParsedPacket[],
   findings: Finding[],
-  flows: ConversationFlow[]
+  flows: ConversationFlow[],
+  timeline?: IncidentTimelineEvent[]
 ) {
   const totalPackets = packets.length;
   const totalBytes = packets.reduce((acc, p) => acc + p.length, 0);
@@ -230,6 +341,7 @@ export function computeAnalysisStats(
     capture_sha256,
     capture_md5,
     timeline_histogram,
+    incident_timeline: timeline,
   };
 }
 

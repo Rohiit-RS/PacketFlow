@@ -140,6 +140,40 @@ export function FindingCard({ finding, onSelectEvidence }: FindingCardProps) {
           </div>
         </div>
 
+        {/* Causal Correlation Callout */}
+        {finding.correlation && (
+          <div className={cn(
+            "p-5 rounded-xl border flex items-start gap-3.5 transition-colors",
+            finding.correlation.relation_type === "INDUCED_COLLATERAL_DAMAGE"
+              ? "bg-amber-500/10 border-amber-500/30 text-ink"
+              : "bg-red-500/10 border-red-500/30 text-ink"
+          )}>
+            <Zap size={20} className={finding.correlation.relation_type === "INDUCED_COLLATERAL_DAMAGE" ? "text-amber-500 shrink-0 mt-0.5" : "text-flag shrink-0 mt-0.5"} />
+            <div className="space-y-1">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className={cn(
+                  "text-xs font-bold uppercase tracking-wider px-2 py-0.5 rounded-md",
+                  finding.correlation.relation_type === "INDUCED_COLLATERAL_DAMAGE"
+                    ? "bg-amber-500/20 text-amber-600 dark:text-amber-400 font-mono"
+                    : "bg-red-500/20 text-red-600 dark:text-red-400 font-mono"
+                )}>
+                  {finding.correlation.relation_type === "INDUCED_COLLATERAL_DAMAGE" ? "⚡ Induced Collateral Symptom" : "🎯 Root Cause Driver"}
+                </span>
+                <Link
+                  href={`/findings/${finding.correlation.related_finding_id}`}
+                  className="text-xs font-mono font-bold text-brand hover:underline inline-flex items-center gap-1"
+                >
+                  Linked with {finding.correlation.related_finding_id}
+                  <ArrowRight size={12} />
+                </Link>
+              </div>
+              <p className="text-sm text-ink-2 leading-relaxed font-medium">
+                {finding.correlation.explanation}
+              </p>
+            </div>
+          </div>
+        )}
+
         {expanded && (
           <div className="space-y-5 animate-in fade-in pt-1">
             {/* Technical Root Cause */}

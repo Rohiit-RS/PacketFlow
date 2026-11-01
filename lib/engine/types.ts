@@ -44,6 +44,23 @@ export interface RemediationRules {
   cisco?: string;
 }
 
+export interface FindingCorrelation {
+  related_finding_id: string;
+  relation_type: "INDUCED_COLLATERAL_DAMAGE" | "ROOT_CAUSE" | "RECONNAISSANCE_PRECURSOR";
+  explanation: string;
+}
+
+export interface IncidentTimelineEvent {
+  step: number;
+  timestamp: number;
+  phase: "RECONNAISSANCE" | "EXPLOITATION" | "COLLATERAL_FAULT" | "IMPACT";
+  title: string;
+  detail: string;
+  finding_id?: string;
+  actor_ip?: string;
+  target_ip?: string;
+}
+
 export interface Finding {
   id: string; // e.g., "FINDING-001"
   category: FindingCategory;
@@ -60,6 +77,7 @@ export interface Finding {
   remediation_rules?: RemediationRules;
   affected_ips?: string[];
   affected_ports?: number[];
+  correlation?: FindingCorrelation;
 }
 
 export interface DiagnosticSummary {
@@ -170,5 +188,6 @@ export interface AnalysisEngineResult {
     capture_sha256?: string;
     capture_md5?: string;
     timeline_histogram?: { time_bucket: number; count: number; attacks: number; bytes: number }[];
+    incident_timeline?: IncidentTimelineEvent[];
   };
 }

@@ -87,27 +87,6 @@ Browser (Dashboard / Findings / Packets / Topology / Remediation / Report / Docs
 
 ---
 
-## Run it locally
-
-Requirements: Node 18+ (tested on Node 20 and Node 22).
-
-```bash
-npm install
-npm run dev
-```
-
-App will be live at `http://localhost:3000`.
-
----
-
-## Deploy (Vercel)
-
-1. Import the GitHub repository in Vercel (framework: Next.js).
-2. Deploy directly with zero configuration (no environment variables or external databases required).
-3. Open `/` to test the preloaded capture scenarios or drop in your own `.pcap` files.
-
----
-
 ## Safety and input bounds
 
 - **Strict Buffer Bounds:** Every binary slice of an ingested PCAP buffer is verified against the buffer's total byte length prior to reading, eliminating out-of-bounds reads and memory overflows.
@@ -163,45 +142,6 @@ Every heuristic and detection rule is grounded in official RFC standards and MIT
   - **CWE-400:** Uncontrolled Resource Consumption
   - **CWE-436:** Interpretation Conflict (Duplicate IP / Routing conflict)
   - **CWE-89:** SQL Injection
-
----
-
-## Alignment with hackathon judging criteria
-
-| Criteria | Weight | How PacketFlow Exceeds Expectations |
-|---|---|---|
-| **Novelty** | **20%** | Features **Cross-Layer Causal Inference** (discovering when attacks induce collateral operational faults). Real-time SVG Network Threat Topology graph with animated vectors, plus automated firewall & Snort rule synthesis. |
-| **Technical Implementation** | **30%** | 100% original TypeScript protocol parser and state machine engine. Implements detection for 14+ attack & fault types, MITRE ATT&CK mapping, and Follow TCP Stream reconstruction with zero native C/tshark wrappers. |
-| **Security of Solution** | **20%** | Zero code execution guarantees on untrusted packet payloads, strict HTML escaping, client-side offline parsing (zero data leakage), and cryptographic SHA-256 evidence integrity. |
-| **Feasibility** | **10%** | Clean 1-command startup (`npm run dev`), pre-loaded 1-click test scenarios, responsive dark/light UI, and native Vercel serverless readiness. |
-| **Video Presentation** | **20%** | Full, word-for-word 3-minute video presentation script provided below covering every key feature. |
-
----
-
-## Winning 3-minute video presentation script
-
-Use this exact timing and spoken script for your video submission:
-
-### Minute 0:00 - 0:45 &bull; The Problem & System Overview
-> *"Hello judges! Welcome to PacketFlow, our Automated Network Packet Analysis and Security Diagnostic Engine built for the Network Track of the Cybersecurity Hackathon.  
-> Small offices, research labs, and college departments often face network disruptions. But without a dedicated network engineer, diagnosing packet captures line-by-line in Wireshark is overwhelming. Worse, when connections drop, it's nearly impossible for a beginner to tell whether it's a harmless cable fault or a targeted cyber attack hiding in the exact same traffic.  
-> PacketFlow solves this completely: you drop in a PCAP or JSON capture, and our custom engine automatically analyzes the telemetry, differentiates outages from attacks with weighted confidence scores, and outputs human-readable diagnoses with immediate and long-term fixes."*
-
-### Minute 0:45 - 1:30 &bull; Operational Fault Demonstration
-> *"Let's test an operational failure. Clicking on our pre-loaded 'TCP Congestion & Outage' scenario, PacketFlow immediately returns a WARNING verdict with a primary classification of BENIGN_FAULT.  
-> Notice how the engine identifies a 58% packet loss rate and receiver window exhaustion. It translates this complex TCP zero-window state into plain English for non-experts: 'The receiving computer's buffer is 100% full and asked the sender to pause.'  
-> Clicking the finding opens its dedicated Dossier page, citing exact packet frame evidence. Clicking Frame #3 jumps straight into our Deep Packet Inspector, highlighting the zero-window flag."*
-
-### Minute 1:30 - 2:20 &bull; Cyber Attack & Causal Differentiation Demonstration
-> *"Now let's switch to an active cyber incident: 'ARP Spoofing & Gateway Hijacking'. The platform instantly shifts to CRITICAL health and MALICIOUS_ATTACK.  
-> It isolates the attacker MAC forging unsolicited ARP replies to intercept router traffic, assigning a 98% confidence score. Each attack is mapped to the MITRE ATT&CK framework—here, Technique T1557.002.  
-> Crucially, look at our Cross-Layer Causal Correlation: the engine notices that the ARP attack caused lower-layer packet loss, which triggered a storm of TCP retransmissions. It explicitly flags the retransmissions as an Induced Collateral Symptom caused by the primary attack!  
-> Next, let's open our Network Threat Topology tab at `/topology`. You can visually see the entire communication graph: the attacker node pulses in red, while hostile traffic vectors are animated across the network."*
-
-### Minute 2:20 - 3:00 &bull; Automated Defense & Forensic Report
-> *"PacketFlow doesn't just diagnose—it automates remediation. Under the `/remediation` tab, the engine auto-generates copy-pasteable Linux iptables drop scripts, Snort and Suricata IDS signature rules, and Cisco switch hardening configurations. You can select your network interface, toggle findings, and even test them in our live dry-run shell simulator.  
-> Finally, navigating to `/report`, PacketFlow generates a print-ready Executive Forensic Audit Report, complete with SHA-256 cryptographic chain-of-custody checksums.  
-> In compliance with Rule 3, our parser and detection logic are 100% our own original TypeScript with zero reliance on Wireshark wrappers, and it runs anywhere with zero data leakage. Thank you!"*
 
 ---
 

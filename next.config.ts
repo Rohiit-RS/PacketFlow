@@ -2,6 +2,14 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
+  async rewrites() {
+    return [
+      {
+        source: "/api/analyse",
+        destination: "/api/analyze",
+      },
+    ];
+  },
   // Safe header policies for diagnostic telemetry
   async headers() {
     return [

@@ -45,10 +45,12 @@ PacketFlow is built on Next.js 15 App Router as a modern, multi-page application
 ### A. Network Faults (Operational Issues)
 1. **TCP Retransmissions & Packet Loss**: Tracks duplicate sequence numbers per flow. Quantifies packet loss percentage and identifies bottlenecked paths.
 2. **TCP Window Size Issues (Zero Window Freeze)**: Detects when a receiving endpoint collapses its TCP window to 0, signaling receiver CPU or I/O exhaustion.
-3. **Duplicate IP & Addressing Conflicts**: Detects multiple distinct hardware MAC addresses claiming ownership of the identical IP address via ARP broadcasts.
-4. **Path MTU Mismatch & Black Hole Routers**: Pinpoints ICMP Type 3 Code 4 (*Destination Unreachable, Fragmentation Needed and DF bit set*) notifications caused by constricted VPN tunnels or VLAN trunks.
-5. **DNS Resolver Failures**: Flags anomalous non-zero RCODE responses (NXDOMAIN, SERVFAIL, REFUSED) and query timeout conditions.
-6. **Performance & Latency Degradation**: Calculates round-trip-time (RTT) deltas between handshakes and data-acknowledgment sequences, flagging spikes exceeding 250ms.
+3. **TCP Out-of-Order Segment Reassembly (RFC 793)**: Identifies segments arriving behind the highest observed sequence on unidirectional streams, diagnosing multi-path ECMP reordering jitter.
+4. **Abnormal TCP Reset (RST) Storms**: Detects bursts of abrupt session tear-downs triggered by crashed applications, non-listening ports, or stateful firewall idle timeouts.
+5. **Duplicate IP & Addressing Conflicts**: Detects multiple distinct hardware MAC addresses claiming ownership of the identical IP address via ARP broadcasts.
+6. **Path MTU Mismatch & Black Hole Routers**: Pinpoints ICMP Type 3 Code 4 (*Destination Unreachable, Fragmentation Needed and DF bit set*) notifications caused by constricted VPN tunnels or VLAN trunks.
+7. **DNS Resolver Failures**: Flags anomalous non-zero RCODE responses (NXDOMAIN, SERVFAIL, REFUSED) and query timeout conditions.
+8. **Performance & Latency Degradation**: Calculates round-trip-time (RTT) deltas between handshakes and data-acknowledgment sequences, flagging spikes exceeding 250ms.
 
 ### B. Security Attacks (Malicious Activity)
 1. **Stealth Port Scans** (*MITRE T1046*):
@@ -59,16 +61,20 @@ PacketFlow is built on Next.js 15 App Router as a modern, multi-page application
 3. **ARP Spoofing & MITM Poisoning** (*MITRE T1557.002*): Unsolicited Gratuitous ARP replies asserting ownership of the Default Gateway IP (`192.168.1.1`), diverting traffic through an attacker MAC.
 4. **Rogue DNS & Domain Hijacking** (*MITRE T1584.002*): Non-gateway internal hosts forging port 53 UDP replies to redirect corporate users to phishing portals.
 5. **Rogue DHCP Server Conflict** (*MITRE T1557*): Unauthorized secondary DHCP server offering rogue IP leases, malicious default gateways, and rogue DNS servers.
-6. **Traffic Anomalies & Web Exploits** (*MITRE T1190 & T1498.001*):
+6. **Algorithmic Domain Generation (DGA) & C2 Beacons** (*MITRE T1568.002*): Computes Shannon character entropy and consonant clustering across outbound DNS queries to detect automated botnet/ransomware C2 rendezvous.
+7. **Covert Data Exfiltration** (*MITRE T1071.004*): High-entropy DNS tunneling subdomains smuggling sensitive payloads via TXT/A queries.
+8. **Traffic Anomalies & Web Exploits** (*MITRE T1190 & T1498.001*):
    - **Land Attack**: Malformed packets where Source IP equals Destination IP and ports match.
    - **Injection Signatures**: Unencrypted payloads matching SQL injection (`OR 1=1`, `UNION SELECT`), path traversal (`../../etc/passwd`), or command shells (`/bin/sh`, `cmd.exe`).
-7. **Covert Data Exfiltration** (*MITRE T1071.004*): DNS Tunneling (unusually long query labels with high Shannon entropy and base32/base64 strings exfiltrating data via TXT/A queries).
 
-### C. Fault vs. Attack Differentiation (Crucial Requirement)
-Every finding is evaluated by our differentiation logic to prevent false alarms:
-* *Why a burst of TCP RSTs is a closed service port vs. a SYN flood.*
-* *Why multiple DNS errors represent an upstream ISP outage vs. an active DNS hijack.*
-* *Assigns an explicit confidence score (0-100%) and provides root-cause technical rationale.*
+### C. Fault vs. Attack Differentiation & Causal Correlation (Crucial Requirement)
+Every finding is evaluated by our differentiation and cross-layer correlation engine:
+* **Cross-Layer Causal Inference**: Discovers when lower-layer attacks (such as ARP Cache Poisoning or SYN floods) induce layer-4 operational degradation (such as TCP retransmissions and RTT spikes). Explicitly marks faults as **`⚡ Induced Collateral Symptoms`** and points to the primary **`🎯 Root Cause Driver`**.
+* **Distinguishing Failures from Incursions**:
+  * *Why a burst of TCP RSTs is an operational closed service port timeout vs. an active half-open SYN scan.*
+  * *Why multiple DNS errors represent an upstream ISP outage vs. rogue DNS hijacking or DGA C2 activity.*
+* **Confidence Scoring**: Assigns an explicit Bayesian evidence-weighted score (0-100%) and provides root-cause technical rationale to minimize false positives.
+* **Chronological Kill-Chain Timeline**: Synthesizes the full incident sequence: *Reconnaissance &rarr; Incursion/Exploit &rarr; Induced Operational Outage*.
 
 ---
 

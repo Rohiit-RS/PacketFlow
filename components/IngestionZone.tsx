@@ -8,10 +8,12 @@ import {
   ClipboardPaste,
   CheckCircle2,
   Layers,
+  Download,
 } from "lucide-react";
 import { Button, Chip, Panel, Swatch, cn } from "./ui";
 import { SAMPLE_SCENARIOS } from "@/lib/samples/sampleData";
 import { useCapture } from "@/lib/context/CaptureContext";
+import { synthesizePcapBinary } from "@/lib/engine/pcapWriter";
 import { toast } from "sonner";
 
 export function IngestionZone() {
@@ -76,6 +78,42 @@ export function IngestionZone() {
       setPasteContent("");
     } catch (err) {
       toast.error(`Parsing error: ${err instanceof Error ? err.message : String(err)}`);
+    }
+  };
+
+  const handleDownloadPcap = () => {
+    try {
+      const pcapBytes = synthesizePcapBinary(analysisResult.packets);
+      const blob = new Blob([pcapBytes as BlobPart], { type: "application/vnd.tcpdump.pcap" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${currentCaptureName.replace(/\.[^/.]+$/, "")}.pcap`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+      toast.success("Downloaded Wireshark-compatible .pcap capture!");
+    } catch (err) {
+      toast.error("Failed to generate .pcap file.");
+    }
+  };
+
+  const handleDownloadJson = () => {
+    try {
+      const jsonStr = JSON.stringify(analysisResult.packets, null, 2);
+      const blob = new Blob([jsonStr], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${currentCaptureName.replace(/\.[^/.]+$/, "")}_telemetry.json`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+      toast.success("Downloaded JSON telemetry capture file!");
+    } catch (err) {
+      toast.error("Failed to generate JSON file.");
     }
   };
 
@@ -148,14 +186,34 @@ export function IngestionZone() {
             </p>
           </div>
 
-          <div className="pt-4 border-t border-rule flex items-center justify-between gap-3">
-            <span className="text-xs text-ink-3">Raw telemetry log input:</span>
+          <div className="pt-4 border-t border-rule flex flex-wrap items-center justify-between gap-2.5">
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleDownloadPcap}
+                title="Download this capture as a binary .pcap file to open in Wireshark"
+              >
+                <Download size={13} />
+                <span>Export .pcap</span>
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleDownloadJson}
+                title="Download this capture as JSON telemetry"
+              >
+                <FileCode size={13} />
+                <span>Export JSON</span>
+              </Button>
+            </div>
+
             <Button
               variant="secondary"
               size="sm"
               onClick={() => setPasteModalOpen(true)}
             >
-              <ClipboardPaste size={15} className="text-brand" />
+              <ClipboardPaste size={14} className="text-brand" />
               <span>Paste JSON Logs</span>
             </Button>
           </div>
